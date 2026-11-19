@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({head:()=>({meta:[{title:"ETP Analytics — Gustavo Pereira | BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"ETP Analytics — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
 function Index(){
 const [activeHero,setHero]=useState("financeiro"); const [activeCat,setCat]=useState("Todos");
-const [modal,setModal]=useState<string|null>(null); const [modalTab,switchModalTab]=useState("overview");
 const [proposal,setProposal]=useState("consultoria-recorrente");const [segment,setSegment]=useState("Financeiro");
-const [briefing,setBriefing]=useState("");const [copied,setCopied]=useState(false);const previousFocus=useRef<HTMLElement|null>(null);
-function closeModal(){setModal(null);previousFocus.current?.focus();}
-function openModal(id:string){previousFocus.current=document.activeElement instanceof HTMLElement?document.activeElement:null;switchModalTab("overview");setModal(id);}
-useEffect(()=>{if(!modal)return;const old=document.body.style.overflow;document.body.style.overflow="hidden";const dialog=document.querySelector<HTMLElement>('[role="dialog"]');dialog?.querySelector<HTMLElement>('button')?.focus();function key(e:KeyboardEvent){if(e.key==="Escape")closeModal();if(e.key==="Tab"){const items=Array.from(dialog?.querySelectorAll<HTMLElement>('button,a[href],iframe')??[]).filter(el=>el.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}document.addEventListener("keydown",key);return()=>{document.body.style.overflow=old;document.removeEventListener("keydown",key);};},[modal]);
+const [briefing,setBriefing]=useState("");const [copied,setCopied]=useState(false);
 function selectProposalAndScroll(id:string){setProposal(id);document.getElementById("contato")?.scrollIntoView({behavior:"smooth"});}
 function selectSegmentAndScroll(title:string){setSegment(title);selectProposalAndScroll("projeto-pontual");}
 function submitBriefing(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=e.currentTarget;const value=(id:string)=>(f.querySelector<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>("#"+id)?.value??"");const sel=f.querySelector<HTMLSelectElement>("#f-proposal");setBriefing(["Olá, Gustavo / ETP Analytics! Gostaria de solicitar um diagnóstico / proposta:",`• Nome: ${value("f-name")}`,`• Empresa: ${value("f-company")}`,`• Contato: ${value("f-contact")}`,`• Modelo de interesse: ${sel?.selectedOptions[0]?.text??""}`,`• Área / Segmento principal: ${segment}`,value("f-challenge").trim()?`• Desafio atual: ${value("f-challenge").trim()}`:""].filter(Boolean).join("\n"));}
@@ -24,7 +20,7 @@ const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": 
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
 const solutions = (<> <article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
-const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('logistica'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('logistica');}}}>
+const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OTIF"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"96,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Custo/Km"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 3,42"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Entregas"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4.820"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -38,12 +34,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Logística"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Frota, entregas no prazo (OTIF), SLA e custo operacional por rota."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('rh'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('rh');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Headcount"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"412"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Turnover"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"2,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Absenteísmo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -57,12 +52,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Recursos Humanos"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Turnover, headcount, absenteísmo, folha salarial e retenção."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('hospitalar'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('hospitalar');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Ocupação"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"87,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Média Perm."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4,1 d"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Triagem"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"94%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -76,12 +70,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Hospitalar"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Ocupação de leitos, giro hospitalar, glosas e indicadores clínicos."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('producao'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('producao');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OEE Global"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"84,6%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Refugo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,3%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Disponib."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"92,1%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -95,12 +88,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Produção"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"OEE global, refugos, paradas de máquina e eficiência por turno."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('vendas'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('vendas');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Faturamento"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 1,92M"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Meta"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"112%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"29,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -114,12 +106,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Vendas"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Funil comercial, metas, ticket médio, curva ABC e vendedores."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('telemarketing'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('telemarketing');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"TMA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"3m 42s"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Nível Serv."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"91,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"18,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -133,12 +124,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Telemarketing"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"TMA, taxa de conversão, nível de serviço e produtividade."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('obra-financas'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('obra-financas');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Avanço Fís."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"68,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Desvio Orç."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"-1,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Medições"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 4,6M"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -152,12 +142,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Evolução de Obra & Finanças"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Cronograma físico-financeiro, previsto × realizado e desvios."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('operacional'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('operacional');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Interno"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"95,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Backlog"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"34"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Eficiência"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"89%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -171,12 +160,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Operacional"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Indicadores de rotina, produtividade de equipes, SLAs e metas."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex cursor-pointer flex-col overflow-hidden rounded-2xl text-left" onClick={(e) => { openModal('financeiro'); }} role="button" tabIndex={0} onKeyDown={(e)=>{if(e.key === "Enter" || e.key === " "){e.preventDefault();openModal('financeiro');}}}>
+</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"EBITDA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"26,8%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Caixa Proj."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 890k"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Margem Líq."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"19,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
@@ -190,9 +178,8 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <h3 className="mt-2 text-lg font-semibold text-[#F0F4F8]">{"Financeiro"}</h3>
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"DRE gerencial, fluxo de caixa projetado, margens e EBITDA."}</p>
 </div>
-<div className="mt-4 flex items-center justify-between gap-2 border-t border-[#18212C] pt-3.5">
-<span className="text-xs font-medium text-[#A3E635] group-hover:underline">{"Ver painel ao vivo ↗"}</span>
-<a href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noreferrer" className="rounded-md border border-[#1F2A37] bg-[#111720] px-2 py-1 text-[10px] font-medium text-[#94A3B8] hover:border-[#A3E635]/50 hover:text-white" onClick={(e) => { e.stopPropagation(); }}>{"Abrir link ↗"}</a>
+<div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
+<a href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
 </div>
 </div>
 </article>)} </>);
@@ -258,7 +245,7 @@ return (<>
 <section id="inicio" className="etp-hero-atmosphere border-b border-[#161E28]" style={{"background":"radial-gradient(62% 52% at 14% 12%, rgba(132, 204, 22, 0.055) 0%, rgba(77, 124, 15, 0.018) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 22%, rgba(163, 230, 53, 0.022) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)"}}>
 <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
 <div className="mx-auto max-w-4xl text-center">
-<p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              Exclusivo para Donos de Empresa & Diretores • São Paulo, SP\n            "}</p>
+<p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              INTELIGÊNCIA DE DADOS, BI & AUTOMAÇÃO • TODOS OS SEGMENTOS\n            "}</p>
 <h1 className="font-editorial text-5xl leading-[1.05] text-[#F0F4F8] sm:text-6xl">{"\n              Inteligência de dados para "}<span className="italic text-[#A3E635]">{"decisões precisas"}</span>{" na sua empresa.\n            "}</h1>
 <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"ETP Analytics"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
 </div>
@@ -522,556 +509,4 @@ return (<>
 <a href="#inicio" className="text-[#A3E635] hover:text-[#BEF264]">{"Voltar ao topo ↑"}</a>
 </div>
 </footer>
-
-
-
-{modal === "logistica" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"LOGÍSTICA • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Logística"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"OTIF"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"96,4%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Custo/Km"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"R$ 3,42"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Entregas"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"4.820"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "55%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "72%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "91%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "77%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "51%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "64%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "79%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"OTIF por transportadora e região"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Custo de frete sobre faturamento e custo por km"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Tempo médio de carregamento, trânsito e descarga"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Mapa de ocorrências, avarias e devoluções"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Identificação imediata de rotas deficitárias e atrasos"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Redução de custos extras com reentregas e ociosidade"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 a 3 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"TMS / ERP • SQL • Excel"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Logística");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Logística →"}</Button>
-</div>
-</div>
-</div>)}{modal === "rh" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"GENTE & GESTÃO • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Recursos Humanos"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Headcount"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"412"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Turnover"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"2,4%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Absenteísmo"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"1,8%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "89%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "48%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "75%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "61%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "69%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "80%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "66%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Turnover voluntário e involuntário por área"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Evolução de headcount, admissões e desligamentos"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Absenteísmo, horas extras e banco de horas"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Análise de custo de folha e encargos"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Previsibilidade de contratação e menos custos rescisórios"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Visão consolidada para diretoria e RH"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"Senior / TOTVS • Folha • Excel"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Recursos Humanos");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Recursos Humanos →"}</Button>
-</div>
-</div>
-</div>)}{modal === "hospitalar" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"SAÚDE • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Hospitalar"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Ocupação"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"87,2%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Média Perm."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"4,1 d"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"SLA Triagem"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"94%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "51%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "78%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "91%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "71%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "84%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "93%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "76%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Taxa de ocupação por ala (UTI, enfermaria, PS)"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Tempo médio de permanência e reinternação"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Produtividade cirúrgica, exames e fila de espera"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Faturamento hospitalar e glosas por convênio"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Melhor alocação de leitos e redução de espera"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Governança sobre glosas e previsibilidade de receita"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"3 a 4 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"Tasy / MV • Oracle / SQL"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Hospitalar");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Hospitalar →"}</Button>
-</div>
-</div>
-</div>)}{modal === "producao" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"INDÚSTRIA • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Produção"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"OEE Global"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"84,6%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Refugo"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"1,3%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Disponib."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"92,1%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "70%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "64%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "79%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "53%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "92%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "73%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "86%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"OEE completo: Disponibilidade, Performance e Qualidade"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Pareto de motivos de parada por máquina"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Volume produzido vs. planejado por turno e linha"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Índice de refugo e custo de perda industrial"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Mais capacidade produtiva sem novos investimentos"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Gestão à vista em TVs de chão de fábrica"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 a 4 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"MES • ERP Industrial • SQL"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Produção");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Produção →"}</Button>
-</div>
-</div>
-</div>)}{modal === "vendas" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"COMERCIAL • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Vendas"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Faturamento"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"R$ 1,92M"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Meta"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"112%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Conversão"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"29,8%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "96%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "67%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "59%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "74%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "91%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "61%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "48%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Faturamento realizado vs. meta (diário, mensal, YoY)"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Ranking de vendedores, filiais e canais"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Curva ABC de produtos, clientes ativos e churn"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Funil de vendas e ciclo médio de fechamento"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Direcionamento comercial para contas de maior margem"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Visibilidade diária de metas sem esperar fim do mês"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"CRM • ERP Comercial • APIs"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Vendas");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Vendas →"}</Button>
-</div>
-</div>
-</div>)}{modal === "telemarketing" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"CONTACT CENTER • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Telemarketing"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"TMA"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"3m 42s"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Nível Serv."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"91,5%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Conversão"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"18,4%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "54%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "83%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "91%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "67%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "87%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "78%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "70%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"TMA, TME e taxa de abandono por fila"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Atendimentos por hora, célula e operador"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Conversão e resolução no 1º contato"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Aderência à escala e CSAT/NPS"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Aumento na conversão por agente e menos abandono"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Acompanhamento intra-hora para supervisão"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"PABX / Discador • Omnichannel"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Telemarketing");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Telemarketing →"}</Button>
-</div>
-</div>
-</div>)}{modal === "obra-financas" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"ENGENHARIA • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Evolução de Obra & Finanças"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Avanço Fís."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"68,5%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Desvio Orç."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"-1,4%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Medições"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"R$ 4,6M"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "93%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "84%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "77%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "68%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "59%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "50%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "89%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Curva S físico-financeira por etapa da obra"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Orçamento por centro de custo e empreiteiro"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Desembolsos, medições e saldo a executar"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Alertas de estouro de verba e prazos"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Controle rigoroso de margens em obras simultâneas"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Prevenção de estouros orçamentários"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"3 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"Sienge / Mega • MS Project"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Evolução de Obra & Finanças");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Evolução de Obra & Finanças →"}</Button>
-</div>
-</div>
-</div>)}{modal === "operacional" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"GESTÃO • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Operacional"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"SLA Interno"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"95,2%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Backlog"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"34"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Eficiência"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"89%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "54%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "63%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "71%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "76%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "80%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "85%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "90%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Demandas abertas, concluídas e backlog por área"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Cumprimento de SLA por prioridade"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Capacidade utilizada vs. disponível"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Painel executivo de OKRs semanais"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Eliminação de gargalos entre departamentos"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Reuniões semanais guiadas 100% por fatos"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"Jira / Pipefy • ERP • APIs"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Operacional");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Operacional →"}</Button>
-</div>
-</div>
-</div>)}{modal === "financeiro" && (<div id="dashboard-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5" onClick={closeModal}>
-<div role="dialog" aria-modal="true" aria-labelledby="modal-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[#243140] bg-[#0D1218] shadow-2xl" onClick={(e) => { e.stopPropagation(); }}>
-<div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#1A232F] px-6 py-4">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]" id="modal-tag">{"FINANÇAS • Projeto Real em Power BI"}</p>
-<h3 className="font-editorial mt-1 text-3xl text-[#F0F4F8]" id="modal-title">{"Dashboard de Financeiro"}</h3>
-</div>
-<div className="flex items-center gap-2.5">
-<div className="inline-flex rounded-lg border border-[#1E2835] bg-[#090C10] p-1">
-<Button className="cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-[#8B9BB0] hover:text-white" id="tab-pbi" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('powerbi'); }}>{"Power BI Ao Vivo"}</Button>
-<Button className="cursor-pointer rounded-md bg-[#A3E635] px-3 py-1.5 text-xs font-semibold text-[#090C10]" id="tab-ov" type="button" variant="imported" size="imported" onClick={(e) => { switchModalTab('overview'); }}>{"Indicadores & Escopo"}</Button>
-</div>
-<Button className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E2835] bg-[#111720] text-[#94A3B8] hover:text-white" type="button" variant="imported" size="imported" onClick={(e) => { closeModal(); }} aria-label="Fechar dashboard">{"✕"}</Button>
-</div>
-</div>
-<div className="flex-1 overflow-y-auto p-5 sm:p-6">
-
-<div className="space-y-4" id="modal-view-powerbi" hidden={modalTab !== "powerbi"}>
-<div className="relative aspect-video w-full overflow-hidden rounded-xl border border-[#1E2835] bg-[#070A0E]">
-{modalTab === "powerbi" && (<iframe allowFullScreen className="h-full w-full border-0" id="modal-pbi-iframe" src="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" title="Relatório Power BI"></iframe>)}
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#1A2430] bg-[#0A0E14] px-4 py-3 text-xs text-[#94A3B8]">
-<span >{"Caso o preview restrinja iframes externos ou peça login Microsoft, clique para abrir o relatório em tela cheia."}</span>
-<a className="font-semibold text-[#A3E635] hover:text-[#BEF264]" href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-ext-top" rel="noreferrer" target="_blank">{"Abrir relatório em nova aba ↗"}</a>
-</div>
-</div>
-
-<div className="space-y-6" id="modal-view-overview" hidden={modalTab !== "overview"}>
-<div className="rounded-xl border border-[#1B2532] bg-[#090D12] p-5">
-<div className="grid grid-cols-3 gap-3" id="modal-kpis"><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"EBITDA"}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"26,8%"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Caixa Proj."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"R$ 890k"}</p></div><div className="rounded-xl border border-[#1A2430] bg-[#0F151D] px-4 py-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Margem Líq."}</p><p className="font-mono-data mt-1 text-lg font-semibold text-[#F0F4F8]">{"19,4%"}</p></div></div>
-<div className="mt-4 rounded-xl border border-[#1A2430] bg-[#0D1218] p-4">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-xs font-medium text-[#CBD5E1]">{"Desempenho Consolidado (Exemplo de Estrutura)"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"Power BI + Atualização Automática"}</span>
-</div>
-<div className="flex h-28 items-end justify-between gap-2" id="modal-bars"><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "70%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jan"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "78%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Fev"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]" style={{"height": "100%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mar"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "59%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Abr"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "67%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Mai"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "83%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jun"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "87%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Jul"}</span></div><div className="flex flex-1 flex-col items-center gap-1.5"><div className="flex h-24 w-full items-end"><div className="w-full rounded-t-md bg-[#A3E635]/35" style={{"height": "76%"}}></div></div><span className="font-mono-data text-[10px] text-[#64748B]">{"Ago"}</span></div></div>
-</div>
-</div>
-<div className="grid gap-6 md:grid-cols-2">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Principais Indicadores Inclusos"}</h4>
-<ul className="mt-3 space-y-2.5 text-sm text-[#CBD5E1]" id="modal-indicators"><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"DRE gerencial dinâmica (competência e caixa)"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Fluxo de caixa diário e projetado (30/60/90d)"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Contas a pagar/receber, aging e inadimplência"}</span></li><li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Análise vertical/horizontal de despesas"}</span></li></ul>
-</div>
-<div className="space-y-4">
-<div >
-<h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4F8]">{"Impacto na Gestão"}</h4>
-<ul className="mt-3 space-y-2" id="modal-impact"><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Clareza absoluta sobre lucro real e ponto de equilíbrio"}</li><li className="rounded-lg border border-[#1A2430] bg-[#10161E] px-3.5 py-2.5 text-xs text-[#CBD5E1]">{"Fim dos fechamentos manuais demorados em Excel"}</li></ul>
-</div>
-<div className="grid grid-cols-2 gap-3">
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Prazo Médio"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]" id="modal-time">{"2 a 3 semanas"}</p></div>
-<div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-3"><p className="text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Integrações"}</p><p className="mt-1 text-xs font-medium text-[#CBD5E1]" id="modal-sources">{"Omie / TOTVS / SAP • SQL"}</p></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1A232F] bg-[#0B1016] px-6 py-4">
-<a className="inline-flex items-center gap-2 rounded-full border border-[#283647] bg-[#111720] px-4 py-2 text-xs font-medium text-[#E2E8F0] hover:border-[#A3E635]/60 hover:text-[#A3E635]" href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" id="modal-pbi-link" rel="noreferrer" target="_blank">{"Abrir no Power BI ↗"}</a>
-<Button className="cursor-pointer rounded-full bg-[#A3E635] px-5 py-2.5 text-xs font-semibold text-[#090C10] hover:bg-[#BEF264]" id="modal-cta-btn" onClick={()=>{closeModal();selectSegmentAndScroll("Financeiro");}} type="button" variant="imported" size="imported">{"Solicitar proposta para Financeiro →"}</Button>
-</div>
-</div>
-</div>)}</>);}
+</>);}
