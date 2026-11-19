@@ -426,16 +426,17 @@ return (<>
 <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
 
 <div className="lg:col-span-5">
-<div className="relative h-full min-h-[400px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
-<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="h-full w-full object-cover object-top" />
-<div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#090C10] via-[#090C10]/85 to-transparent"></div>
-<div className="absolute inset-x-0 bottom-0 p-6">
+<div className="flex h-full flex-col items-center justify-center gap-6 rounded-2xl border border-[#222D3A] bg-[#0A0D12] p-6 text-center sm:p-8">
+<div className="w-[185px] overflow-hidden rounded-xl border border-[#222D3A] bg-[#090C10] shadow-lg">
+<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="aspect-[177/260] w-full object-cover object-top" />
+</div>
+<div >
 <p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador & CEO • ETP Analytics"}</p>
-<p className="font-editorial mt-1 text-4xl leading-none text-[#F0F4F8]">
+<p className="font-editorial mt-1.5 text-4xl leading-none text-[#F0F4F8]">
 <span className="text-[#A3E635]">{"Gustavo"}</span>
 <span className="italic">{"Pereira"}</span>
 </p>
-<div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#CBD5E1]">
+<div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#CBD5E1]">
 <span >{"Especialista em BI & Dados"}</span>
 <span >{"•"}</span>
 <span >{"São Paulo, SP"}</span>
