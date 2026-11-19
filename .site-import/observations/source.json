@@ -20,5 +20,35 @@
   "sourceScreenshots": [
     "/tmp/browser/etp/source-desktop.png",
     "/tmp/browser/etp/source-mobile.png"
-  ]
+  ],
+  "preview": {
+    "status": "passed",
+    "viewports": [
+      "1280x1800",
+      "390x844"
+    ],
+    "checks": [
+      "7 sections rendered and wheel-scrolled",
+      "3 hero tabs",
+      "category filter",
+      "all 9 dashboard overviews with 4 indicators each",
+      "Power BI tab creates original iframe and preserves external URL",
+      "dashboard CTA selects segment and proposal",
+      "proposal CTA selects automation",
+      "briefing generate/copy/edit with test input"
+    ],
+    "runtimeErrors": [],
+    "build": "OK",
+    "routingTest": "passed",
+    "screenshots": [
+      "/tmp/browser/etp/preview-desktop.png",
+      "/tmp/browser/etp/modal-390.png",
+      "/tmp/browser/etp/briefing-390.png"
+    ],
+    "limitations": [
+      "Power BI report contents require external Microsoft access and were not verified",
+      "Source contact cards are display-only and include placeholder phone number; preserved unchanged",
+      "Repository imported as source, not connected as Git sync"
+    ]
+  }
 }
