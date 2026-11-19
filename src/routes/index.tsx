@@ -288,7 +288,7 @@ return (<>
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"02 / Portfólio de Projetos Reais"}</p>
 <h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Dashboards por segmento"}</h2>
 </div>
-<p className="text-xs font-medium text-[#7D8C9F]">{"Clique no card para abrir o painel interativo em Power BI ou use o link direto"}</p>
+<p className="text-xs font-medium text-[#7D8C9F]">{"Abra o painel interativo no Power BI pelo link de cada card"}</p>
 </div>
 <div className="mt-8 flex flex-wrap gap-2" id="category-filters">{filterButtons}</div>
 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" id="dashboards-grid">{dashboardCards}</div>
