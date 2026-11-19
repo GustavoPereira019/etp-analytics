@@ -255,73 +255,19 @@ return (<>
 </header>
 <main >
 
-<section id="inicio" className="etp-hero-atmosphere border-b border-[#161E28]">
-<div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 md:pb-20 md:pt-20 lg:px-8">
-<div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-<div className="lg:col-span-6">
+<section id="inicio" className="etp-hero-atmosphere border-b border-[#161E28]" style={{"background":"radial-gradient(62% 52% at 14% 12%, rgba(132, 204, 22, 0.055) 0%, rgba(77, 124, 15, 0.018) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 22%, rgba(163, 230, 53, 0.022) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)"}}>
+<div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
+<div className="mx-auto max-w-4xl text-center">
 <p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              Exclusivo para Donos de Empresa & Diretores • São Paulo, SP\n            "}</p>
 <h1 className="font-editorial text-5xl leading-[1.05] text-[#F0F4F8] sm:text-6xl">{"\n              Inteligência de dados para "}<span className="italic text-[#A3E635]">{"decisões precisas"}</span>{" na sua empresa.\n            "}</h1>
-<p className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"ETP Analytics"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
-<div className="mt-8 flex flex-wrap items-center gap-3.5">
-<Button type="button" className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#A3E635] px-6 py-3 text-sm font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('diagnostico-gratuito'); }}>{"\n                Solicitar Diagnóstico Gratuito →\n              "}</Button>
-<a href="#dashboards" className="inline-flex items-center gap-2 rounded-full border border-[#273342] bg-[#0F141B]/80 px-5 py-3 text-sm font-medium text-[#E2E8F0] transition-colors hover:border-[#3A4C61] hover:bg-[#141C25]">{"\n                Testar Dashboards ao Vivo "}<span className="text-[#A3E635]">{"↗"}</span>
-</a>
-</div>
-
-<a href="#sobre" className="mt-8 flex max-w-md items-center gap-3.5 rounded-xl border border-[#1D2733] bg-[#0D1218]/90 px-3.5 py-2.5 transition-colors hover:border-[#2E3E52]">
-<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira" className="h-11 w-11 shrink-0 rounded-lg border border-[#263241] object-cover object-top" />
-<div className="min-w-0 flex-1">
-<p className="text-xs font-semibold text-[#F0F4F8]">{"Liderado por "}<span className="text-[#A3E635]">{"Gustavo Pereira"}</span></p>
-<p className="truncate text-[11px] text-[#8B9BB0]">{"Fundador • 3+ anos em BI & Análise de Dados"}</p>
-</div>
-<span className="text-xs text-[#6E7E91]">{"↗"}</span>
-</a>
-<div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#8A9BB0]">
-<span >{"✓ Proposta técnica em até 48h"}</span>
-<span >{"✓ 9 dashboards reais em Power BI para testar"}</span>
-</div>
-</div>
-
-<div className="lg:col-span-6">
-<div className="rounded-2xl border border-[#1E2835] bg-[#0D1218]/95 p-5 shadow-2xl">
-<div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1A232F] pb-4">
-<div >
-<span className="font-mono-data text-[10px] uppercase tracking-[0.16em] text-[#A3E635]">{"Demonstração Executiva"}</span>
-<h2 id="hero-demo-subtitle" className="mt-0.5 text-sm font-semibold text-[#F0F4F8]">{heroSubtitle}</h2>
-</div>
-<div className="inline-flex rounded-lg border border-[#1E2733] bg-[#090C10] p-1" id="hero-tab-buttons">{heroButtons}</div>
-</div>
-<div className="mt-4 grid grid-cols-3 gap-2.5" id="hero-kpi-grid">{heroKpis}</div>
-<div className="mt-4 grid gap-3 sm:grid-cols-12">
-<div className="rounded-xl border border-[#1A232F] bg-[#0B0F14] p-3.5 sm:col-span-7">
-<div className="mb-3 flex items-center justify-between">
-<span className="text-[11px] font-medium text-[#94A3B8]">{"Evolução Mensal"}</span>
-<span className="font-mono-data text-[10px] text-[#64748B]">{"Jan – Ago"}</span>
-</div>
-<div className="flex h-24 items-end justify-between gap-1.5" id="hero-bars">{heroBars}</div>
-</div>
-<div className="flex flex-col justify-between rounded-xl border border-[#1A232F] bg-[#0B0F14] p-3.5 sm:col-span-5">
-<div className="flex items-center justify-between">
-<span className="text-[11px] font-medium text-[#94A3B8]">{"Tendência"}</span>
-<span className="font-mono-data text-[10px] text-[#A3E635]">{"+Meta"}</span>
-</div>
-<svg id="hero-trend-svg" viewBox="0 0 260 74" className="mt-2 h-20 w-full overflow-visible">{heroTrend}</svg>
-<p id="hero-updated-label" className="font-mono-data text-[10px] text-[#64748B]">{heroUpdated}</p>
-</div>
-</div>
-<div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-[#1E2A20] bg-[#101812] px-3.5 py-2.5">
-<span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#A3E635]"></span>
-<p id="hero-insight" className="text-xs leading-relaxed text-[#CBD5E1]">{heroInsight}</p>
-</div>
-</div>
-</div>
+<p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"ETP Analytics"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
 </div>
 
 <div className="mt-14 grid grid-cols-2 divide-y divide-[#1A232F] rounded-xl border border-[#1A232F] bg-[#0D1218]/90 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
-<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"Especialidade"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"BI, Dados & Automação"}</p></div>
-<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"Atuação"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"São Paulo • Nacional"}</p></div>
-<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"Stack Principal"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Power BI • SQL • n8n"}</p></div>
-<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"Atendimento"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Donos de Empresa & Diretoria"}</p></div>
+<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ARQUITETURA"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"BI, Engenharia de Dados & IA"}</p></div>
+<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ECOSSISTEMA"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Power BI • SQL • Python • n8n"}</p></div>
+<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"INTEGRAÇÕES"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"ERPs, CRMs & Bancos de Dados"}</p></div>
+<div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ATUAÇÃO"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Projetos Sob Medida • Brasil"}</p></div>
 </div>
 
 <div className="mt-12 grid grid-cols-2 gap-8 border-t border-[#161E28] pt-10 sm:grid-cols-4">
