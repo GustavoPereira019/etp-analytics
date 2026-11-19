@@ -1,0 +1,24 @@
+{
+  "source": "https://github.com/GustavoPereira019/etp-analytics",
+  "file": "etp_analytics_preview.html",
+  "viewports": [
+    "1280x1800",
+    "390x844"
+  ],
+  "controls": [
+    "hero tabs",
+    "category filters",
+    "9 dashboard overview popups",
+    "Power BI tab and external links",
+    "proposal selection",
+    "briefing generation/copy/edit"
+  ],
+  "sourcePhoneNavigation": "No phone menu in source",
+  "assetMapping": {
+    "embedded founder JPEG": "/__l5e/assets-v1/8cbf1370-38d9-4d29-bc6d-df0d70d9ec82/gustavo-pereira.jpg"
+  },
+  "sourceScreenshots": [
+    "/tmp/browser/etp/source-desktop.png",
+    "/tmp/browser/etp/source-mobile.png"
+  ]
+}
