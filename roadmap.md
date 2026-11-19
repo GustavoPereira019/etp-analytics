@@ -5,3 +5,4 @@
 - [x] Report external Power BI and source contact limitations.
 - [x] Rework Hero: single centered column, remove demo card/CTAs/badge/captions, soften glow, new 4-block copy.
 - [x] Hero eyebrow reworded; dashboard modal + duplicate footer buttons removed, one Power BI link per card.
+- [x] Dashboard support line reworded to point at each card's Power BI link.
