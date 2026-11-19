@@ -269,7 +269,7 @@ return (<>
 </div>
 
 <a href="#sobre" className="mt-8 flex max-w-md items-center gap-3.5 rounded-xl border border-[#1D2733] bg-[#0D1218]/90 px-3.5 py-2.5 transition-colors hover:border-[#2E3E52]">
-<img src="/__l5e/assets-v1/8cbf1370-38d9-4d29-bc6d-df0d70d9ec82/gustavo-pereira.jpg" alt="Gustavo Pereira" className="h-11 w-11 shrink-0 rounded-lg border border-[#263241] object-cover object-top" />
+<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira" className="h-11 w-11 shrink-0 rounded-lg border border-[#263241] object-cover object-top" />
 <div className="min-w-0 flex-1">
 <p className="text-xs font-semibold text-[#F0F4F8]">{"Liderado por "}<span className="text-[#A3E635]">{"Gustavo Pereira"}</span></p>
 <p className="truncate text-[11px] text-[#8B9BB0]">{"Fundador • 3+ anos em BI & Análise de Dados"}</p>
@@ -427,7 +427,7 @@ return (<>
 
 <div className="lg:col-span-5">
 <div className="relative h-full min-h-[400px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
-<img src="/__l5e/assets-v1/8cbf1370-38d9-4d29-bc6d-df0d70d9ec82/gustavo-pereira.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="h-full w-full object-cover object-top" />
+<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="h-full w-full object-cover object-top" />
 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#090C10] via-[#090C10]/85 to-transparent"></div>
 <div className="absolute inset-x-0 bottom-0 p-6">
 <p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador & CEO • ETP Analytics"}</p>
