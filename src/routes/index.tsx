@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Inteligência de Dados, BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
 
@@ -224,6 +224,383 @@ function SpotlightOverlay() {
           "radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(163, 230, 53, 0.085), transparent 65%)",
       }}
     />
+  );
+}
+
+function BeforeAfterComparator() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState(50);
+  const dragging = useRef(false);
+
+  const updateFromClientX = (clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (!rect.width) return;
+    const pct = ((clientX - rect.left) / rect.width) * 100;
+    setPos(Math.max(6, Math.min(94, pct)));
+  };
+
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    updateFromClientX(e.clientX);
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current) return;
+    updateFromClientX(e.clientX);
+  };
+
+  const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.current = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setPos((p) => Math.max(6, p - 4));
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setPos((p) => Math.min(94, p + 4));
+    }
+  };
+
+  const beforeRows: readonly [string, string, string, string, string][] = [
+    ["A1", "Faturamento_Bruto", "R$ 2.140.000", "#REF!", "revisar c/ financeiro"],
+    ["A2", "Despesas_Fixas (antigo)", "R$ 892.410", "DESATUALIZADO", "copiar aba 3"],
+    ["A3", "Margem_Real_v2", "#DIV/0!", "R$ ???", "planilha travando"],
+    ["A4", "Vendas_Outubro_FINAL", "1.420.890,5", "1420890", "duplicado!!"],
+    ["A5", "Comissao_Equipe", "#VALOR!", "pendente", "aguardando CSV"],
+    ["A6", "Caixa_Projetado_30d", "R$ 418.200", "R$ 502.900", "qual tá certo?"],
+    ["A7", "Custo_Operacao_Total", "R$ 612.000", "#REF!", "quebrou PROCV"],
+  ];
+
+  const afterBars = [48, 56, 61, 68, 74, 82, 88, 96];
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onMouseMove={handleSpotlightMove}
+      className="group/spot relative mt-10 cursor-ew-resize touch-none select-none overflow-hidden rounded-2xl border border-[#1E2733] bg-[#0D1218] shadow-2xl"
+    >
+      <SpotlightOverlay />
+
+      {/* BASE LAYER: DEPOIS • Dashboard Elite Tech Pro (lado direito visível à direita do divisor) */}
+      <div className="relative flex min-h-[430px] flex-col justify-between bg-[#0B1016] p-5 sm:min-h-[450px] sm:p-7">
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#19222D] pb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="h-2 w-2 rounded-full bg-[#A3E635]" />
+              <span className="font-mono-data text-[10px] font-semibold uppercase tracking-[0.16em] text-[#A3E635]">
+                {"DEPOIS • Dashboard Elite Tech Pro"}
+              </span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#263822] bg-[#101912] px-3 py-1 font-mono-data text-[10px] text-[#A3E635]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#A3E635]" />
+              {"Atualizado automaticamente via SQL"}
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-4">
+              <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Margem Líquida"}</p>
+              <p className="font-mono-data mt-1.5 text-2xl font-semibold text-[#F0F4F8]">{"24,8%"}</p>
+              <p className="mt-1 text-[11px] font-medium text-[#A3E635]">{"↗ +4,2 pp vs mês ant."}</p>
+            </div>
+            <div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-4">
+              <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Faturamento"}</p>
+              <p className="font-mono-data mt-1.5 text-2xl font-semibold text-[#F0F4F8]">{"R$ 2,84M"}</p>
+              <p className="mt-1 text-[11px] font-medium text-[#A3E635]">{"↗ +18,4% no trimestre"}</p>
+            </div>
+            <div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-4">
+              <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Eficiência"}</p>
+              <p className="font-mono-data mt-1.5 text-2xl font-semibold text-[#F0F4F8]">{"96,4%"}</p>
+              <p className="mt-1 text-[11px] font-medium text-[#A3E635]">{"↗ +11,2% operacional"}</p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-12">
+            <div className="rounded-xl border border-[#1A2430] bg-[#0E141B] p-4 sm:col-span-7">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="font-mono-data text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Evolução Mensal • Receita × Meta"}</span>
+                <span className="font-mono-data text-[10px] font-semibold text-[#A3E635]">{"+22,6% YoY"}</span>
+              </div>
+              <div className="flex h-28 items-end justify-between gap-2">
+                {afterBars.map((h, idx) => (
+                  <div key={idx} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                    <div
+                      className={`w-full rounded-t-sm ${idx >= 6 ? "bg-[#A3E635]" : "bg-[#A3E635]/40"}`}
+                      style={{ height: `${h}%` }}
+                    />
+                    <span className="font-mono-data text-[9px] text-[#64748B]">
+                      {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago"][idx]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-xl border border-[#1A2430] bg-[#0E141B] p-4 sm:col-span-5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono-data text-[10px] uppercase tracking-wider text-[#7D8C9F]">{"Tendência EBITDA"}</span>
+                <span className="font-mono-data text-[10px] text-[#A3E635]">{"Em tempo real"}</span>
+              </div>
+              <svg viewBox="0 0 220 76" className="my-2 h-20 w-full overflow-visible">
+                <defs>
+                  <linearGradient id="afterTrendGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#A3E635" stopOpacity="0.32" />
+                    <stop offset="100%" stopColor="#A3E635" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <polygon
+                  points="0,76 0,58 36,52 72,46 108,38 144,31 180,22 220,12 220,76"
+                  fill="url(#afterTrendGrad)"
+                />
+                <polyline
+                  fill="none"
+                  stroke="#A3E635"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points="0,58 36,52 72,46 108,38 144,31 180,22 220,12"
+                />
+              </svg>
+              <p className="text-[11px] text-[#94A3B8]">{"Consolidação automática sem retrabalho manual."}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#18212C] pt-3 text-[11px] text-[#8B9BB0]">
+          <span>{"✓ Fonte única validada • Power BI + SQL + n8n"}</span>
+          <span className="font-mono-data text-[#A3E635]">{"Decisão em segundos"}</span>
+        </div>
+      </div>
+
+      {/* OVERLAY LAYER: ANTES • Planilhas Manuais (recortado pela esquerda conforme pos%) */}
+      <div
+        aria-hidden
+        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+        className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-[#101317] p-5 sm:p-7"
+      >
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#252A33] pb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded border border-red-500/35 bg-red-500/10 px-2.5 py-0.5 font-mono-data text-[10px] font-semibold uppercase tracking-[0.14em] text-red-400">
+                {"ANTES • Planilhas Manuais"}
+              </span>
+              <span className="font-mono-data rounded border border-[#2A313C] bg-[#161B22] px-2 py-0.5 text-[10px] text-[#94A3B8]">
+                {"Versão_Final_v4.xlsx"}
+              </span>
+            </div>
+            <span className="rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 font-mono-data text-[10px] text-amber-300">
+              {"⚠ Dados desatualizados"}
+            </span>
+          </div>
+
+          <div className="mt-4 overflow-hidden rounded-lg border border-[#262C36] bg-[#0C0F13] font-mono-data text-[11px]">
+            <div className="grid grid-cols-12 border-b border-[#262C36] bg-[#161B22] text-[10px] text-[#6E7E91]">
+              <div className="col-span-1 border-r border-[#262C36] px-2 py-1.5">{"#"}</div>
+              <div className="col-span-4 border-r border-[#262C36] px-2 py-1.5">{"Indicador_Aba2"}</div>
+              <div className="col-span-2 border-r border-[#262C36] px-2 py-1.5">{"Plan_Out"}</div>
+              <div className="col-span-2 border-r border-[#262C36] px-2 py-1.5">{"Plan_Nov"}</div>
+              <div className="col-span-3 px-2 py-1.5">{"Obs_Manual"}</div>
+            </div>
+            {beforeRows.map((row, idx) => (
+              <div
+                key={row[0]}
+                className={`grid grid-cols-12 border-b border-[#1D232C] last:border-b-0 ${
+                  idx % 2 === 1 ? "bg-[#12161D]/70" : ""
+                }`}
+              >
+                <div className="col-span-1 border-r border-[#1D232C] px-2 py-2 text-[#526071]">{row[0]}</div>
+                <div className={`col-span-4 truncate border-r border-[#1D232C] px-2 py-2 text-[#94A3B8] ${idx === 1 ? "pl-5" : idx === 4 ? "pl-1" : ""}`}>
+                  {row[1]}
+                </div>
+                <div className={`col-span-2 truncate border-r border-[#1D232C] px-2 py-2 ${row[2].startsWith("#") ? "bg-red-500/15 font-bold text-red-400" : "text-[#CBD5E1]"}`}>
+                  {row[2]}
+                </div>
+                <div className={`col-span-2 truncate border-r border-[#1D232C] px-2 py-2 ${row[3].startsWith("#") ? "bg-red-500/15 font-bold text-red-400" : row[3] === "DESATUALIZADO" ? "bg-amber-500/15 text-amber-300" : "text-[#8B9BB0]"}`}>
+                  {row[3]}
+                </div>
+                <div className="col-span-3 truncate px-2 py-2 italic text-amber-300/80">{row[4]}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2 font-mono-data text-[10px]">
+            <span className="rounded border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-red-400">{"#REF! (3 células quebradas)"}</span>
+            <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-amber-300">{"Versão_Final_v4.xlsx • cópia local"}</span>
+            <span className="rounded border border-[#262D38] bg-[#151A22] px-2.5 py-1 text-[#7D8C9F]">{"12 abas manuais • sem histórico"}</span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#232933] pt-3 text-[11px] text-[#7D8C9F]">
+          <span>{"✕ Horas perdidas copiando e colando dados toda semana"}</span>
+          <span className="font-mono-data text-red-400/90">{"Alto risco de erro"}</span>
+        </div>
+      </div>
+
+      {/* DIVISOR VERTICAL VERDE-LIMA + BOTÃO CENTRAL ARRASTÁVEL */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-label="Comparar antes e depois"
+        aria-valuemin={6}
+        aria-valuemax={94}
+        aria-valuenow={Math.round(pos)}
+        onKeyDown={handleKeyDown}
+        style={{ left: `${pos}%` }}
+        className="absolute inset-y-0 z-20 -ml-px w-[2px] bg-[#A3E635] shadow-[0_0_18px_rgba(163,230,53,0.75)] focus:outline-none"
+      >
+        <div className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#A3E635] bg-[#090C10] text-sm font-bold text-[#A3E635] shadow-[0_0_24px_rgba(163,230,53,0.35)] transition-transform duration-150 hover:scale-110">
+          {"‹ ›"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
+  const [hoursPerWeek, setHoursPerWeek] = useState(10);
+  const [hourlyCost, setHourlyCost] = useState(60);
+
+  const recoveredHoursPerYear = Math.round(hoursPerWeek * 52 * 0.8);
+  const annualSavings = Math.round(hoursPerWeek * 52 * 0.8 * hourlyCost);
+  const monthlySavings = Math.round(annualSavings / 12);
+  const workdaysSaved = Math.round(recoveredHoursPerYear / 8);
+
+  const formatBRL = (val: number) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0,
+    }).format(val);
+
+  const hoursPct = ((hoursPerWeek - 2) / (40 - 2)) * 100;
+  const costPct = ((hourlyCost - 25) / (200 - 25)) * 100;
+
+  return (
+    <div
+      onMouseMove={handleSpotlightMove}
+      className="group/spot relative mt-12 overflow-hidden rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6 transition-all duration-300 hover:border-[#2A3747] sm:p-8 lg:p-10"
+    >
+      <SpotlightOverlay />
+      <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
+        {/* COLUNA ESQUERDA: CONTROLES */}
+        <div className="space-y-8 lg:col-span-6">
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <label htmlFor="roi-hours" className="text-sm font-medium text-[#E2E8F0]">
+                {"Horas gastas por semana montando relatórios/planilhas"}
+              </label>
+              <span className="font-mono-data shrink-0 rounded-lg border border-[#263822] bg-[#101912] px-3 py-1 text-sm font-semibold text-[#A3E635]">
+                {`${hoursPerWeek}h / sem`}
+              </span>
+            </div>
+            <input
+              id="roi-hours"
+              type="range"
+              min={2}
+              max={40}
+              step={1}
+              value={hoursPerWeek}
+              onChange={(e) => setHoursPerWeek(Number(e.target.value))}
+              className="etp-range mt-4"
+              style={{
+                background: `linear-gradient(to right, #A3E635 0%, #A3E635 ${hoursPct}%, #1C2530 ${hoursPct}%, #1C2530 100%)`,
+              }}
+            />
+            <div className="mt-2 flex justify-between font-mono-data text-[10px] text-[#6E7E91]">
+              <span>{"2h / sem"}</span>
+              <span>{"20h / sem"}</span>
+              <span>{"40h / sem"}</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <label htmlFor="roi-cost" className="text-sm font-medium text-[#E2E8F0]">
+                {"Custo médio por hora da equipe envolvida (R$)"}
+              </label>
+              <span className="font-mono-data shrink-0 rounded-lg border border-[#263822] bg-[#101912] px-3 py-1 text-sm font-semibold text-[#A3E635]">
+                {`R$ ${hourlyCost} / h`}
+              </span>
+            </div>
+            <input
+              id="roi-cost"
+              type="range"
+              min={25}
+              max={200}
+              step={5}
+              value={hourlyCost}
+              onChange={(e) => setHourlyCost(Number(e.target.value))}
+              className="etp-range mt-4"
+              style={{
+                background: `linear-gradient(to right, #A3E635 0%, #A3E635 ${costPct}%, #1C2530 ${costPct}%, #1C2530 100%)`,
+              }}
+            />
+            <div className="mt-2 flex justify-between font-mono-data text-[10px] text-[#6E7E91]">
+              <span>{"R$ 25 / h"}</span>
+              <span>{"R$ 110 / h"}</span>
+              <span>{"R$ 200 / h"}</span>
+            </div>
+          </div>
+
+          <p className="rounded-xl border border-[#1A2430] bg-[#0B1016] px-4 py-3 text-xs leading-relaxed text-[#8B9BB0]">
+            {"Cálculo conservador considerando "}
+            <strong className="font-semibold text-[#E2E8F0]">{"80% de automação"}</strong>
+            {" sobre 52 semanas/ano — eliminando extração manual, consolidação de planilhas e conferências repetitivas."}
+          </p>
+        </div>
+
+        {/* COLUNA DIREITA: RESULTADOS EM TEMPO REAL */}
+        <div className="flex flex-col justify-between gap-5 rounded-2xl border border-[#233224] bg-[#0B1016] p-6 sm:p-7 lg:col-span-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-[#1A2430] bg-[#10161E] p-5">
+              <p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#7D8C9F]">
+                {"Horas recuperadas por ano"}
+              </p>
+              <p className="font-editorial mt-2 text-4xl leading-none text-[#F0F4F8] sm:text-5xl">
+                {`${recoveredHoursPerYear}h`}
+              </p>
+              <p className="mt-2 text-[11px] text-[#8B9BB0]">
+                {`≈ ${workdaysSaved} dias úteis liberados`}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[#263822] bg-[#101912] p-5">
+              <p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]">
+                {"Economia anual estimada"}
+              </p>
+              <p className="font-editorial mt-2 text-3xl leading-none text-[#A3E635] sm:text-4xl">
+                {formatBRL(annualSavings)}
+              </p>
+              <p className="mt-2 text-[11px] text-[#CBD5E1]">
+                {`≈ ${formatBRL(monthlySavings)} / mês recuperados`}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            className="etp-cta-shimmer mt-1 w-full cursor-pointer rounded-full bg-[#A3E635] px-6 py-3.5 text-xs font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264] sm:text-sm"
+            variant="imported"
+            size="imported"
+            onClick={onCtaClick}
+          >
+            {"Quero automatizar minha operação →"}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -665,6 +1042,35 @@ return (<>
 <div className="mt-8 flex flex-wrap gap-2" id="category-filters">{filterButtons}</div>
 </Reveal>
 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" id="dashboards-grid">{dashboardCards}</div>
+</div>
+</section>
+
+<section id="antes-depois" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
+<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
+<div className="max-w-3xl">
+<p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"TRANSFORMAÇÃO NA PRÁTICA"}</p>
+<h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Saia do caos das planilhas para a clareza executiva."}</h2>
+<p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{"Arraste a barra abaixo para comparar a rotina manual com um painel automatizado da Elite Tech Pro."}</p>
+</div>
+</Reveal>
+<Reveal delay={100}>
+<BeforeAfterComparator />
+</Reveal>
+</div>
+</section>
+
+<section id="calculadora-roi" className="border-b border-[#161E28] py-20 md:py-24">
+<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
+<div className="max-w-3xl">
+<p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"QUANTO CUSTA A OPERAÇÃO MANUAL?"}</p>
+<h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Descubra quanto tempo e dinheiro sua empresa recupera com BI e automação."}</h2>
+</div>
+</Reveal>
+<Reveal delay={100}>
+<RoiCalculator onCtaClick={() => selectProposalAndScroll("automacao-integracoes")} />
+</Reveal>
 </div>
 </section>
 
