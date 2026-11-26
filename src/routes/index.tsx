@@ -331,21 +331,16 @@ return (<>
 <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
 
 <div className="lg:col-span-5">
-<div className="flex h-full flex-col items-center justify-center gap-6 rounded-2xl border border-[#222D3A] bg-[#0A0D12] p-6 text-center sm:p-8">
-<div className="w-[185px] overflow-hidden rounded-xl border border-[#222D3A] bg-[#090C10] shadow-lg">
-<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="aspect-[177/260] w-full object-cover object-top" />
-</div>
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador & CEO • ETP Analytics"}</p>
+<div className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
+<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="absolute inset-0 h-full min-h-[460px] w-full object-cover object-top" />
+<div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
+<div className="absolute inset-x-0 bottom-0 p-6">
+<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador • ETP Analytics"}</p>
 <p className="font-editorial mt-1.5 text-4xl leading-none text-[#F0F4F8]">
-<span className="text-[#A3E635]">{"Gustavo"}</span>
+<span className="text-[#A3E635]">{"Gustavo"}</span>{" "}
 <span className="italic">{"Pereira"}</span>
 </p>
-<div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#CBD5E1]">
-<span >{"Especialista em BI & Dados"}</span>
-<span >{"•"}</span>
-<span >{"São Paulo, SP"}</span>
-</div>
+<p className="mt-3 text-xs text-[#CBD5E1]">{"Especialista em BI, Dados & Automação"}</p>
 </div>
 </div>
 </div>
@@ -353,29 +348,23 @@ return (<>
 <div className="flex flex-col justify-between gap-6 lg:col-span-7">
 <div className="rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6 sm:p-8">
 <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[#1A232F] pb-5">
-<div >
-<p className="font-mono-data text-[10px] uppercase tracking-[0.16em] text-[#7D8C9F]">{"Perfil Profissional do Fundador"}</p>
-<h3 className="font-editorial mt-1 text-4xl leading-tight text-[#F0F4F8]">
-<span className="text-[#A3E635]">{"Gustavo"}</span>
-<span className="italic">{"Pereira"}</span>
-</h3>
-</div>
-<span className="rounded-lg border border-[#233224] bg-[#111B13] px-3 py-1 text-xs font-medium text-[#D9F99D]">{"3+ anos em Análise de Dados"}</span>
+<p className="font-mono-data text-[10px] uppercase tracking-[0.16em] text-[#7D8C9F]">{"Perfil Profissional"}</p>
+<span className="rounded-lg border border-[#233224] bg-[#111B13] px-3 py-1 text-xs font-medium text-[#D9F99D]">{"3+ anos em Dados & BI"}</span>
 </div>
 <div className="mt-5 space-y-4 text-sm leading-relaxed text-[#94A3B8]">
-<p className="text-[15px] text-[#E2E8F0]">{"\n                  Profissional de TI especialista em Business Intelligence, graduado em "}<strong className="font-semibold text-white">{"Sistemas de Informação"}</strong>{" e fundador da "}<strong className="font-semibold text-white">{"ETP Analytics"}</strong>{". Falo a língua de quem é "}<strong className="text-[#A3E635]">{"dono da empresa"}</strong>{": lucro real, margem, fluxo de caixa, metas comerciais e eficiência operacional — sem jargão técnico desnecessário.\n                "}</p>
-<p >{"\n                  Com atuação comprovada em ambientes de alta exigência — incluindo projetos de BI na Secretaria Municipal da Saúde de São Paulo e mais de 20 dashboards entregues em logística, finanças, vendas, indústria, RH e saúde — conduzo pessoalmente desde o diagnóstico estratégico até a entrega final em Power BI, SQL, Python e n8n.\n                "}</p>
+<p className="text-[15px] text-[#E2E8F0]">{"Especialista em Business Intelligence e Análise de Dados, graduado em "}<strong className="font-semibold text-white">{"Sistemas de Informação"}</strong>{" e fundador da "}<strong className="font-semibold text-white">{"ETP Analytics"}</strong>{". Transformo bases complexas em painéis claros e decisões seguras — traduzindo números técnicos para a realidade do negócio."}</p>
+<p >{"Com experiência prática em operações de alta exigência (incluindo o setor de saúde pública) e mais de 20 dashboards entregues em segmentos como logística, finanças, vendas, indústria e RH, conduzo cada projeto de ponta a ponta: da arquitetura em SQL e Python ao design final em Power BI e automações."}</p>
 </div>
 <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#1A232F] pt-6">
-<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Formação"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Sistemas de Informação • TI"}</p></div>
-<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Especialidade"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Power BI, SQL, Python & n8n"}</p></div>
-<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Histórico Real"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"+20 Dashboards • 9+ Segmentos"}</p></div>
-<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Compromisso"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Reunião direta com o fundador"}</p></div>
+<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Formação"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Sistemas de Informação • Pós em Dados"}</p></div>
+<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Especialidade"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Power BI, SQL, Python & Automação"}</p></div>
+<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Experiência"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"+20 Dashboards • 9+ Segmentos"}</p></div>
+<div className="border-l-2 border-[#A3E635] pl-3.5"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"Atendimento"}</p><p className="mt-1 text-xs font-semibold text-[#E2E8F0] sm:text-sm">{"Direto com o fundador"}</p></div>
 </div>
 </div>
 <div className="rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6">
 <div className="flex flex-wrap items-center justify-between gap-3">
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"O que entregamos para a diretoria"}</p>
+<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Como atuamos no seu projeto"}</p>
 <Button type="button" className="cursor-pointer text-xs font-semibold text-[#A3E635] hover:text-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('diagnostico-gratuito'); }}>{"\n                  Conversar com Gustavo Pereira ↗\n                "}</Button>
 </div>
 <ul className="mt-4 grid gap-2.5 sm:grid-cols-2 text-xs text-[#CBD5E1]">
@@ -384,7 +373,7 @@ return (<>
 <li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Modelagem e consolidação de bases SQL e ERPs"}</span></li>
 <li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Automação de relatórios via n8n e Python"}</span></li>
 <li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Diagnóstico de maturidade de dados e consultoria"}</span></li>
-<li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Design de painéis para diretoria e TVs"}</span></li>
+<li className="flex items-start gap-2"><span className="text-[#A3E635]">{"✓"}</span><span >{"Design de painéis executivos no Figma"}</span></li>
 </ul>
 </div>
 </div>
