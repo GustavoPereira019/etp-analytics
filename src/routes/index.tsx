@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-export const Route = createFileRoute("/")({head:()=>({meta:[{title:"ETP Analytics — Gustavo Pereira | BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"ETP Analytics — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
+export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Gustavo Pereira | BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
 function Index(){
 const [activeHero,setHero]=useState("financeiro"); const [activeCat,setCat]=useState("Todos");
 function selectProposalAndScroll(_id?:string){document.getElementById("contato")?.scrollIntoView({behavior:"smooth"});}
@@ -213,7 +213,7 @@ return (<>
 <a href="#inicio" className="flex items-center gap-3">
 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#A3E635] text-xs font-extrabold tracking-tight text-[#090C10]">{"ETP"}</span>
 <div className="leading-tight">
-<span className="block text-sm font-semibold tracking-tight text-[#F0F4F8]">{"ETP Analytics"}</span>
+<span className="block text-sm font-semibold tracking-tight text-[#F0F4F8]">{"Elite Tech Pro"}</span>
 <span className="hidden text-[11px] text-[#7D8C9F] sm:block">{"Inteligência de Dados, BI & Automação"}</span>
 </div>
 </a>
@@ -235,7 +235,7 @@ return (<>
 <div className="mx-auto max-w-4xl text-center">
 <p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              INTELIGÊNCIA DE DADOS, BI & AUTOMAÇÃO • TODOS OS SEGMENTOS\n            "}</p>
 <h1 className="font-editorial text-5xl leading-[1.05] text-[#F0F4F8] sm:text-6xl">{"\n              Inteligência de dados para "}<span className="italic text-[#A3E635]">{"decisões precisas"}</span>{" na sua empresa.\n            "}</h1>
-<p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"ETP Analytics"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
+<p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"Elite Tech Pro"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
 </div>
 
 <div className="mt-14 grid grid-cols-2 divide-y divide-[#1A232F] rounded-xl border border-[#1A232F] bg-[#0D1218]/90 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
@@ -318,7 +318,7 @@ return (<>
 <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
 <div >
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"05 / Quem Lidera Cada Projeto • Para Donos de Empresa"}</p>
-<h2 className="font-editorial mt-2 text-4xl leading-[1.06] text-[#F0F4F8] sm:text-5xl">{"Atendimento direto com o fundador da ETP Analytics."}</h2>
+<h2 className="font-editorial mt-2 text-4xl leading-[1.06] text-[#F0F4F8] sm:text-5xl">{"Atendimento direto com o fundador da Elite Tech Pro."}</h2>
 </div>
 <span className="font-mono-data rounded-full border border-[#263822] bg-[#101912] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[#A3E635]">{"\n            Só para quem é dono da empresa & diretoria\n          "}</span>
 </div>
@@ -326,10 +326,10 @@ return (<>
 
 <div className="lg:col-span-5">
 <div className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
-<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da ETP Analytics" className="absolute inset-0 h-full min-h-[460px] w-full object-cover object-top" />
+<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da Elite Tech Pro" className="absolute inset-0 h-full min-h-[460px] w-full object-cover object-top" />
 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
 <div className="absolute inset-x-0 bottom-0 p-6">
-<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador • ETP Analytics"}</p>
+<p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador • Elite Tech Pro"}</p>
 <p className="font-editorial mt-1.5 text-4xl leading-none text-[#F0F4F8]">
 <span className="text-[#A3E635]">{"Gustavo"}</span>{" "}
 <span className="italic">{"Pereira"}</span>
@@ -346,7 +346,7 @@ return (<>
 <span className="rounded-lg border border-[#233224] bg-[#111B13] px-3 py-1 text-xs font-medium text-[#D9F99D]">{"3+ anos em Dados & BI"}</span>
 </div>
 <div className="mt-5 space-y-4 text-sm leading-relaxed text-[#94A3B8]">
-<p className="text-[15px] text-[#E2E8F0]">{"Especialista em Business Intelligence e Análise de Dados, graduado em "}<strong className="font-semibold text-white">{"Sistemas de Informação"}</strong>{" e fundador da "}<strong className="font-semibold text-white">{"ETP Analytics"}</strong>{". Transformo bases complexas em painéis claros e decisões seguras — traduzindo números técnicos para a realidade do negócio."}</p>
+<p className="text-[15px] text-[#E2E8F0]">{"Especialista em Business Intelligence e Análise de Dados, graduado em "}<strong className="font-semibold text-white">{"Sistemas de Informação"}</strong>{" e fundador da "}<strong className="font-semibold text-white">{"Elite Tech Pro"}</strong>{". Transformo bases complexas em painéis claros e decisões seguras — traduzindo números técnicos para a realidade do negócio."}</p>
 <p >{"Com experiência prática em operações de alta exigência (incluindo o setor de saúde pública) e mais de 20 dashboards entregues em segmentos como logística, finanças, vendas, indústria e RH, conduzo cada projeto de ponta a ponta: da arquitetura em SQL e Python ao design final em Power BI e automações."}</p>
 </div>
 <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#1A232F] pt-6">
@@ -408,7 +408,7 @@ return (<>
 <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-[#6E7E91] sm:flex-row sm:px-6 lg:px-8">
 <div className="flex items-center gap-2.5">
 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#A3E635] text-[10px] font-extrabold text-[#090C10]">{"ETP"}</span>
-<span className="font-medium text-[#CBD5E1]">{"ETP Analytics • Gustavo Pereira"}</span>
+<span className="font-medium text-[#CBD5E1]">{"Elite Tech Pro • Gustavo Pereira"}</span>
 <span >{"• © 2026"}</span>
 </div>
 <a href="#inicio" className="text-[#A3E635] hover:text-[#BEF264]">{"Voltar ao topo ↑"}</a>
