@@ -211,7 +211,7 @@ return (<>
 <header className="sticky top-0 z-40 border-b border-[#1A222C]/90 bg-[#090C10]/90 backdrop-blur-md">
 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 <a href="#inicio" className="flex items-center gap-3">
-<img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-9 w-9 rounded-lg object-contain" />
+<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F0F4F8] p-1"><img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-full w-full object-contain" /></span>
 <div className="leading-tight">
 <span className="block text-sm font-semibold tracking-tight text-[#F0F4F8]">{"Elite Tech Pro"}</span>
 <span className="hidden text-[11px] text-[#7D8C9F] sm:block">{"Inteligência de Dados, BI & Automação"}</span>
@@ -407,7 +407,7 @@ return (<>
 <footer className="border-t border-[#161E28] bg-[#080B0F] py-8">
 <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-[#6E7E91] sm:flex-row sm:px-6 lg:px-8">
 <div className="flex items-center gap-2.5">
-<img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-6 w-6 rounded-md object-contain" />
+<span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#F0F4F8] p-0.5"><img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-full w-full object-contain" /></span>
 <span className="font-medium text-[#CBD5E1]">{"Elite Tech Pro • Gustavo Pereira"}</span>
 <span >{"• © 2026"}</span>
 </div>
