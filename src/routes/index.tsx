@@ -227,117 +227,254 @@ function SpotlightOverlay() {
   );
 }
 
-function BiTelemetryBackground({
-  layerRef,
-}: {
-  layerRef: { current: HTMLDivElement | null };
-}) {
+function PowerBiInteractiveBackground() {
+  const bar1Ref = useRef<HTMLDivElement | null>(null);
+  const bar2Ref = useRef<HTMLDivElement | null>(null);
+  const bar3Ref = useRef<HTMLDivElement | null>(null);
+  const barsGroupRef = useRef<HTMLDivElement | null>(null);
+  const networkLayerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const isFinePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(pointer: fine)").matches;
+
+    let rafId = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
+    let currentMouseX = 0;
+    let currentMouseY = 0;
+
+    const applyTransforms = () => {
+      rafId = 0;
+      const y = window.scrollY || 0;
+      const maxScroll = Math.max(
+        1,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+      const scrollRatio = Math.min(Math.max(y / maxScroll, 0), 1);
+
+      // Smooth lerp toward cursor target
+      currentMouseX += (targetMouseX - currentMouseX) * 0.08;
+      currentMouseY += (targetMouseY - currentMouseY) * 0.08;
+
+      if (!reducedMotion) {
+        if (barsGroupRef.current) {
+          const barsOffsetY = -scrollRatio * 48;
+          const barsOffsetX = currentMouseX * 22;
+          barsGroupRef.current.style.transform = `translate3d(${barsOffsetX.toFixed(1)}px, ${barsOffsetY.toFixed(1)}px, 0)`;
+        }
+
+        const wave = Math.sin(scrollRatio * Math.PI * 2.2);
+        const s1 = Math.max(0.45, Math.min(1.18, 0.72 + scrollRatio * 0.22 - currentMouseX * 0.14 + wave * 0.06));
+        const s2 = Math.max(0.55, Math.min(1.22, 0.86 + scrollRatio * 0.14 + currentMouseX * 0.08 - wave * 0.05));
+        const s3 = Math.max(0.65, Math.min(1.25, 0.94 + (1 - scrollRatio) * 0.12 + currentMouseX * 0.16 + wave * 0.04));
+
+        if (bar1Ref.current) {
+          bar1Ref.current.style.transform = `scaleY(${s1.toFixed(3)})`;
+        }
+        if (bar2Ref.current) {
+          bar2Ref.current.style.transform = `scaleY(${s2.toFixed(3)})`;
+        }
+        if (bar3Ref.current) {
+          bar3Ref.current.style.transform = `scaleY(${s3.toFixed(3)})`;
+        }
+
+        if (networkLayerRef.current) {
+          const netY = -scrollRatio * 64;
+          const netX = -currentMouseX * 18;
+          const rx = -currentMouseY * 2.2;
+          const ry = currentMouseX * 2.6;
+          networkLayerRef.current.style.transform = `perspective(1200px) translate3d(${netX.toFixed(1)}px, ${netY.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+        }
+
+        if (
+          Math.abs(targetMouseX - currentMouseX) > 0.002 ||
+          Math.abs(targetMouseY - currentMouseY) > 0.002
+        ) {
+          rafId = requestAnimationFrame(applyTransforms);
+        }
+      }
+    };
+
+    const schedule = () => {
+      if (!rafId) rafId = requestAnimationFrame(applyTransforms);
+    };
+
+    const onMouseMove = (e: globalThis.MouseEvent) => {
+      const vw = window.innerWidth || 1;
+      const vh = window.innerHeight || 1;
+      targetMouseX = (e.clientX / vw - 0.5) * 2;
+      targetMouseY = (e.clientY / vh - 0.5) * 2;
+      schedule();
+    };
+
+    const onMouseLeave = () => {
+      targetMouseX = 0;
+      targetMouseY = 0;
+      schedule();
+    };
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    if (isFinePointer && !reducedMotion) {
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+      window.addEventListener("mouseleave", onMouseLeave, { passive: true });
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (isFinePointer && !reducedMotion) {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseleave", onMouseLeave);
+      }
+    };
+  }, []);
+
+  const networkNodes: readonly [number, number, boolean][] = [
+    [90, 120, false],
+    [240, 80, true],
+    [410, 160, false],
+    [590, 95, true],
+    [760, 185, false],
+    [960, 110, true],
+    [1140, 175, false],
+    [1310, 95, true],
+    [150, 340, true],
+    [340, 290, false],
+    [520, 360, false],
+    [710, 310, true],
+    [890, 380, false],
+    [1080, 320, true],
+    [1270, 370, false],
+    [110, 560, false],
+    [310, 520, true],
+    [500, 610, false],
+    [680, 540, false],
+    [880, 620, true],
+    [1060, 550, false],
+    [1250, 630, true],
+    [210, 770, false],
+    [450, 740, true],
+    [740, 790, false],
+    [1010, 760, true],
+    [1260, 810, false],
+  ];
+
+  const networkEdges: readonly [number, number][] = [
+    [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7],
+    [0, 8], [1, 9], [2, 9], [2, 10], [3, 11], [4, 11], [4, 12], [5, 13], [6, 13], [6, 14], [7, 14],
+    [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14],
+    [8, 15], [9, 16], [10, 16], [10, 17], [11, 18], [12, 18], [12, 19], [13, 20], [14, 21],
+    [15, 16], [16, 17], [17, 18], [18, 19], [19, 20], [20, 21],
+    [15, 22], [16, 22], [17, 23], [18, 24], [19, 24], [20, 25], [21, 26],
+    [22, 23], [23, 24], [24, 25], [25, 26],
+  ];
+
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#090C10]"
     >
-      {/* Grade técnica fina com eixos discretos */}
+      {/* Grade técnica fina de BI */}
       <div className="etp-bi-grid absolute inset-0 opacity-90" />
 
-      {/* Gráficos fantasma de BI / Telemetria com parallax leve no scroll */}
+      {/* Rede tecnológica de nós e conectores com parallax + inclinação sutil ao mouse */}
       <div
-        ref={layerRef}
-        className="absolute -inset-y-24 inset-x-0 will-change-transform"
+        ref={networkLayerRef}
+        className="absolute -inset-x-10 -inset-y-24 will-change-transform"
       >
-        {/* Top-left: Sparkline de tendência + eixos */}
         <svg
-          viewBox="0 0 520 220"
+          viewBox="0 0 1400 900"
+          preserveAspectRatio="xMidYMid slice"
           fill="none"
-          className="absolute left-[-2%] top-[6%] w-[440px] max-w-[75vw] opacity-[0.065] sm:w-[540px]"
+          className="h-full w-full opacity-[0.16]"
         >
-          <line x1="28" y1="20" x2="28" y2="192" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="28" y1="192" x2="500" y2="192" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="28" y1="64" x2="500" y2="64" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
-          <line x1="28" y1="108" x2="500" y2="108" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
-          <line x1="28" y1="152" x2="500" y2="152" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
-          <polyline
-            points="36,164 92,150 148,156 204,126 260,134 316,96 372,102 428,68 488,42"
-            stroke="#A3E635"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <polyline
-            points="36,178 92,172 148,166 204,158 260,148 316,142 372,130 428,124 488,112"
-            stroke="#CBD5E1"
-            strokeWidth="1"
-            strokeDasharray="3 4"
-          />
-          {[
-            [92, 150],
-            [204, 126],
-            [316, 96],
-            [428, 68],
-            [488, 42],
-          ].map(([cx, cy], idx) => (
-            <circle key={idx} cx={cx} cy={cy} r="3" fill="#A3E635" />
+          {networkEdges.map(([a, b], idx) => {
+            const p1 = networkNodes[a]!;
+            const p2 = networkNodes[b]!;
+            const isCyan = p1[2] && p2[2];
+            return (
+              <line
+                key={idx}
+                x1={p1[0]}
+                y1={p1[1]}
+                x2={p2[0]}
+                y2={p2[1]}
+                stroke={isCyan ? "#0EA5E9" : "#A3E635"}
+                strokeOpacity={isCyan ? "0.45" : "0.38"}
+                strokeWidth="1"
+              />
+            );
+          })}
+          {networkNodes.map(([cx, cy, isCyan], idx) => (
+            <g key={idx}>
+              <circle
+                cx={cx}
+                cy={cy}
+                r="2.6"
+                fill={isCyan ? "#0EA5E9" : "#A3E635"}
+                fillOpacity="0.85"
+              />
+              <circle
+                cx={cx}
+                cy={cy}
+                r="6.5"
+                stroke={isCyan ? "#0EA5E9" : "#A3E635"}
+                strokeOpacity="0.24"
+                strokeWidth="0.9"
+              />
+            </g>
           ))}
         </svg>
+      </div>
 
-        {/* Mid-right: Gráfico de colunas minimalista + marcações de eixo */}
-        <svg
-          viewBox="0 0 420 200"
-          fill="none"
-          className="absolute right-[-2%] top-[38%] w-[360px] max-w-[70vw] opacity-[0.06] sm:w-[440px]"
-        >
-          <line x1="24" y1="172" x2="396" y2="172" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="24" y1="128" x2="396" y2="128" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
-          <line x1="24" y1="84" x2="396" y2="84" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
-          <line x1="24" y1="40" x2="396" y2="40" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
-          {[
-            { x: 42, h: 48, hi: false },
-            { x: 80, h: 72, hi: false },
-            { x: 118, h: 62, hi: false },
-            { x: 156, h: 98, hi: true },
-            { x: 194, h: 84, hi: false },
-            { x: 232, h: 116, hi: true },
-            { x: 270, h: 92, hi: false },
-            { x: 308, h: 132, hi: true },
-            { x: 346, h: 146, hi: true },
-          ].map((bar) => (
-            <rect
-              key={bar.x}
-              x={bar.x}
-              y={172 - bar.h}
-              width="22"
-              height={bar.h}
-              rx="2"
-              fill={bar.hi ? "#A3E635" : "#94A3B8"}
-              fillOpacity={bar.hi ? "0.7" : "0.45"}
-            />
-          ))}
-        </svg>
+      {/* Três barras estilizadas estilo Power BI reagindo ao scroll e mouse */}
+      <div
+        ref={barsGroupRef}
+        className="absolute bottom-[-2%] right-[3%] flex h-[54vh] max-h-[520px] min-h-[260px] w-[260px] items-end justify-between gap-4 opacity-[0.14] will-change-transform sm:right-[6%] sm:w-[340px] sm:gap-6 lg:w-[400px]"
+      >
+        {/* Linhas de eixo de BI ao redor das 3 barras */}
+        <div className="pointer-events-none absolute inset-x-[-24px] bottom-0 h-px bg-gradient-to-r from-transparent via-[#A3E635]/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-[-16px] bottom-[33%] h-px border-t border-dashed border-white/20" />
+        <div className="pointer-events-none absolute inset-x-[-16px] bottom-[66%] h-px border-t border-dashed border-white/20" />
+        <div className="pointer-events-none absolute inset-x-[-16px] top-0 h-px border-t border-dashed border-white/15" />
 
-        {/* Bottom-left: Curva de telemetria em degraus + eixos */}
-        <svg
-          viewBox="0 0 480 180"
-          fill="none"
-          className="absolute bottom-[8%] left-[3%] w-[380px] max-w-[75vw] opacity-[0.055] sm:w-[480px]"
-        >
-          <line x1="20" y1="154" x2="460" y2="154" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="20" y1="24" x2="20" y2="154" stroke="#94A3B8" strokeWidth="1" />
-          {[80, 140, 200, 260, 320, 380, 440].map((x) => (
-            <line key={x} x1={x} y1="154" x2={x} y2="160" stroke="#94A3B8" strokeWidth="1" />
-          ))}
-          <polyline
-            points="20,136 80,136 80,118 140,118 140,124 200,124 200,96 260,96 260,82 320,82 320,64 380,64 380,46 456,46"
-            stroke="#A3E635"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-          <polyline
-            points="20,144 140,132 260,114 380,90 456,74"
-            stroke="#CBD5E1"
-            strokeWidth="1"
-            strokeDasharray="4 5"
-          />
-        </svg>
+        {/* Barra 1 (Menor — Ciano para Verde-Lima) */}
+        <div
+          ref={bar1Ref}
+          className="h-[52%] flex-1 origin-bottom rounded-t-2xl border border-[#0EA5E9]/40 border-b-0 will-change-transform"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(14, 165, 233, 0.72) 0%, rgba(163, 230, 53, 0.22) 65%, rgba(9, 12, 16, 0) 100%)",
+          }}
+        />
+
+        {/* Barra 2 (Média — Verde-Lima para Ciano) */}
+        <div
+          ref={bar2Ref}
+          className="h-[74%] flex-1 origin-bottom rounded-t-2xl border border-[#A3E635]/45 border-b-0 will-change-transform"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(163, 230, 53, 0.78) 0%, rgba(14, 165, 233, 0.28) 68%, rgba(9, 12, 16, 0) 100%)",
+          }}
+        />
+
+        {/* Barra 3 (Maior — Destaque Verde-Lima / Ciano) */}
+        <div
+          ref={bar3Ref}
+          className="h-[94%] flex-1 origin-bottom rounded-t-2xl border border-[#A3E635]/60 border-b-0 will-change-transform"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(163, 230, 53, 0.9) 0%, rgba(14, 165, 233, 0.34) 72%, rgba(9, 12, 16, 0) 100%)",
+          }}
+        />
       </div>
     </div>
   );
@@ -1233,10 +1370,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
 const [activeSection, setActiveSection] = useState<string>("");
 const [methodLineVisible, setMethodLineVisible] = useState(false);
 const [founderImgFailed, setFounderImgFailed] = useState(false);
-const telemetryLayerRef = useRef<HTMLDivElement | null>(null);
 const heroGridRef = useRef<HTMLDivElement | null>(null);
-const founderContainerRef = useRef<HTMLDivElement | null>(null);
-const founderImgRef = useRef<HTMLImageElement | null>(null);
 const methodRef = useRef<HTMLDivElement | null>(null);
 
 useEffect(() => {
@@ -1253,22 +1387,9 @@ useEffect(() => {
     setScrollProgress(maxScroll > 0 ? Math.min(Math.max((y / maxScroll) * 100, 0), 100) : 0);
 
     if (!reducedMotion()) {
-      if (telemetryLayerRef.current) {
-        const telemetryOffset = Math.max(-90, Math.min(90, -y * 0.04));
-        telemetryLayerRef.current.style.transform = `translate3d(0, ${telemetryOffset.toFixed(1)}px, 0)`;
-      }
       if (heroGridRef.current) {
         const gridOffset = Math.min(y * 0.08, 72);
         heroGridRef.current.style.transform = `translate3d(0, ${gridOffset.toFixed(1)}px, 0)`;
-      }
-      if (founderContainerRef.current && founderImgRef.current) {
-        const rect = founderContainerRef.current.getBoundingClientRect();
-        const vh = window.innerHeight || 1;
-        if (rect.bottom >= 0 && rect.top <= vh) {
-          const progress = (rect.top + rect.height / 2 - vh / 2) / vh;
-          const imgOffset = Math.max(-18, Math.min(18, progress * -28));
-          founderImgRef.current.style.transform = `translate3d(0, ${imgOffset.toFixed(1)}px, 0) scale(1.06)`;
-        }
       }
     }
   };
@@ -1542,7 +1663,7 @@ const proposals = (<>
  </>);
 return (<>
 
-<BiTelemetryBackground layerRef={telemetryLayerRef} />
+<PowerBiInteractiveBackground />
 
 <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-transparent">
 <div className="h-full w-full origin-left bg-[#A3E635] transition-transform duration-75 ease-out" style={{ transform: `scaleX(${scrollProgress / 100})` }} />
@@ -1741,7 +1862,7 @@ return (<>
 <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
 
 <div className="lg:col-span-5">
-<div ref={founderContainerRef} className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 backdrop-blur-md">
+<div className="relative aspect-[4/5] max-h-[480px] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 backdrop-blur-md">
 {founderImgFailed ? (
   <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B1016] text-center">
     <span className="font-editorial text-5xl text-[#A3E635]">{"GP"}</span>
@@ -1749,11 +1870,12 @@ return (<>
   </div>
 ) : (
   <img
-    ref={founderImgRef}
-    src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg"
+    src="/images/fundador-gustavo.jpg"
     alt="Gustavo Pereira — Fundador da Elite Tech Pro"
+    loading="eager"
+    decoding="sync"
     onError={() => setFounderImgFailed(true)}
-    className="absolute inset-0 h-full min-h-[460px] w-full scale-[1.06] object-cover object-top will-change-transform"
+    className="h-full w-full object-cover object-top"
   />
 )}
 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
