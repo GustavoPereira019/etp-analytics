@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Gustavo Pereira | BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
+export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Inteligência de Dados, BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
 function Index(){
 const [activeHero,setHero]=useState("financeiro"); const [activeCat,setCat]=useState("Todos");
 function selectProposalAndScroll(_id?:string){document.getElementById("contato")?.scrollIntoView({behavior:"smooth"});}
@@ -211,7 +211,7 @@ return (<>
 <header className="sticky top-0 z-40 border-b border-[#1A222C]/90 bg-[#090C10]/90 backdrop-blur-md">
 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 <a href="#inicio" className="flex items-center gap-3">
-<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#A3E635] text-xs font-extrabold tracking-tight text-[#090C10]">{"ETP"}</span>
+<img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-9 w-9 rounded-lg object-contain" />
 <div className="leading-tight">
 <span className="block text-sm font-semibold tracking-tight text-[#F0F4F8]">{"Elite Tech Pro"}</span>
 <span className="hidden text-[11px] text-[#7D8C9F] sm:block">{"Inteligência de Dados, BI & Automação"}</span>
@@ -407,7 +407,7 @@ return (<>
 <footer className="border-t border-[#161E28] bg-[#080B0F] py-8">
 <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-[#6E7E91] sm:flex-row sm:px-6 lg:px-8">
 <div className="flex items-center gap-2.5">
-<span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#A3E635] text-[10px] font-extrabold text-[#090C10]">{"ETP"}</span>
+<img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-6 w-6 rounded-md object-contain" />
 <span className="font-medium text-[#CBD5E1]">{"Elite Tech Pro • Gustavo Pereira"}</span>
 <span >{"• © 2026"}</span>
 </div>
