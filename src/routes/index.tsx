@@ -604,6 +604,285 @@ function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
   );
 }
 
+const FAQ_ITEMS = [
+  {
+    q: "Preciso pagar licenças caras do Power BI para toda a minha equipe?",
+    a: "Não necessariamente. Estruturamos a publicação de acordo com o porte e a necessidade de acesso da sua empresa, otimizando custos de licenciamento.",
+  },
+  {
+    q: "Vocês conseguem conectar com o meu sistema ERP ou planilhas atuais?",
+    a: "Sim. Integramos dados de ERPs, CRMs, bancos SQL Server e PostgreSQL, APIs e planilhas Excel ou Google Sheets de forma automatizada.",
+  },
+  {
+    q: "Os dados da minha empresa ficam seguros?",
+    a: "Totalmente. Trabalhamos com boas práticas de governança, controle de acesso por perfil e confidencialidade total (NDA quando necessário), mantendo os dados no ambiente da sua empresa.",
+  },
+  {
+    q: "Qual é o prazo médio para entrega de um projeto?",
+    a: "Projetos pontuais de dashboards ou automações costumam ser entregues entre 1 e 4 semanas, dependendo da complexidade e organização das fontes de dados.",
+  },
+  {
+    q: "Como funciona o suporte após a entrega?",
+    a: "Todos os projetos contam com validação junto à sua equipe, treinamento prático de uso e garantia de suporte técnico, além da opção de acompanhamento recorrente.",
+  },
+] as const;
+
+function FaqAccordion() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  return (
+    <div className="mt-10 space-y-3">
+      {FAQ_ITEMS.map((item, idx) => {
+        const isOpen = openIndex === idx;
+        return (
+          <div
+            key={item.q}
+            onMouseMove={handleSpotlightMove}
+            className={`group/spot relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+              isOpen
+                ? "border-[#A3E635]/45 bg-[#101715]"
+                : "border-[#1C2530] bg-[#0D1218] hover:border-[#2A3747]"
+            }`}
+          >
+            <SpotlightOverlay />
+            <button
+              type="button"
+              aria-expanded={isOpen}
+              onClick={() => setOpenIndex(isOpen ? null : idx)}
+              className="relative z-10 flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
+            >
+              <span className="text-sm font-semibold text-[#F0F4F8] sm:text-[15px]">
+                {item.q}
+              </span>
+              <span
+                aria-hidden
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono-data text-sm transition-all duration-300 ${
+                  isOpen
+                    ? "rotate-45 border-[#A3E635]/60 bg-[#A3E635]/15 text-[#A3E635]"
+                    : "border-[#263241] bg-[#111720] text-[#8B9BB0]"
+                }`}
+              >
+                {"+"}
+              </span>
+            </button>
+            <div
+              className={`relative z-10 grid transition-all duration-300 ease-out ${
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <p className="border-t border-[#1A232F]/80 px-5 pb-5 pt-3.5 text-xs leading-relaxed text-[#94A3B8] sm:px-6 sm:text-sm">
+                  {item.a}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const SCOPE_GROUPS = [
+  {
+    key: "solutions",
+    label: "Qual solução você busca?",
+    options: [
+      "Dashboard em Power BI",
+      "Automação de Processos (n8n / Python)",
+      "Integração de Bancos SQL",
+      "Consultoria Recorrente",
+    ],
+  },
+  {
+    key: "areas",
+    label: "Áreas envolvidas",
+    options: [
+      "Financeiro / DRE",
+      "Comercial / Vendas",
+      "Logística / Operações",
+      "Saúde / Clínico",
+      "RH / Pessoas",
+      "Outro segmento",
+    ],
+  },
+  {
+    key: "sources",
+    label: "Onde estão os dados hoje?",
+    options: [
+      "Planilhas Excel / Sheets",
+      "Sistema ERP / CRM",
+      "Banco de Dados SQL",
+      "Várias fontes misturadas",
+    ],
+  },
+] as const;
+
+type ScopeKey = (typeof SCOPE_GROUPS)[number]["key"];
+
+function ScopeSimulator() {
+  const [selected, setSelected] = useState<Record<ScopeKey, string[]>>({
+    solutions: [],
+    areas: [],
+    sources: [],
+  });
+
+  const toggleOption = (group: ScopeKey, option: string) => {
+    setSelected((prev) => {
+      const exists = prev[group].includes(option);
+      return {
+        ...prev,
+        [group]: exists
+          ? prev[group].filter((item) => item !== option)
+          : [...prev[group], option],
+      };
+    });
+  };
+
+  const totalSelected =
+    selected.solutions.length + selected.areas.length + selected.sources.length;
+
+  const buildWhatsappUrl = () => {
+    const lines = [
+      "Olá, Gustavo / Elite Tech Pro! Montei meu escopo pelo site:",
+      selected.solutions.length
+        ? `• Soluções: ${selected.solutions.join(", ")}`
+        : null,
+      selected.areas.length
+        ? `• Áreas envolvidas: ${selected.areas.join(", ")}`
+        : null,
+      selected.sources.length
+        ? `• Onde estão os dados: ${selected.sources.join(", ")}`
+        : null,
+      "Gostaria de conversar sobre um diagnóstico gratuito!",
+    ].filter(Boolean);
+    return `https://wa.me/5511968394636?text=${encodeURIComponent(lines.join("\n"))}`;
+  };
+
+  return (
+    <div
+      onMouseMove={handleSpotlightMove}
+      className="group/spot relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6 transition-all duration-300 hover:border-[#2A3747] sm:p-8"
+    >
+      <SpotlightOverlay />
+      <div className="relative z-10">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1A232F] pb-5">
+          <div>
+            <p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">
+              {"Simulador Rápido de Projeto"}
+            </p>
+            <h3 className="font-editorial mt-1 text-2xl text-[#F0F4F8] sm:text-3xl">
+              {"Monte seu escopo em 30 segundos"}
+            </h3>
+          </div>
+          {totalSelected > 0 && (
+            <button
+              type="button"
+              onClick={() => setSelected({ solutions: [], areas: [], sources: [] })}
+              className="cursor-pointer font-mono-data text-[11px] text-[#7D8C9F] transition-colors hover:text-[#E2E8F0]"
+            >
+              {"Limpar seleção"}
+            </button>
+          )}
+        </div>
+
+        <div className="mt-6 grid gap-8 lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-7">
+            {SCOPE_GROUPS.map((group) => (
+              <div key={group.key}>
+                <p className="font-mono-data text-[11px] uppercase tracking-[0.14em] text-[#8B9BB0]">
+                  {group.label}
+                </p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {group.options.map((option) => {
+                    const isActive = selected[group.key].includes(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        aria-pressed={isActive}
+                        onClick={() => toggleOption(group.key, option)}
+                        className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                          isActive
+                            ? "border-[#A3E635] bg-[#142014] text-[#A3E635]"
+                            : "border-[#1E2733] bg-[#0B1016] text-[#94A3B8] hover:border-[#304054] hover:text-[#F0F4F8]"
+                        }`}
+                      >
+                        {isActive ? `✓ ${option}` : option}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col justify-between gap-5 rounded-xl border border-[#1E2A20] bg-[#0B1016] p-5 lg:col-span-5">
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="font-mono-data text-[10px] uppercase tracking-[0.16em] text-[#A3E635]">
+                  {"Resumo do seu escopo"}
+                </p>
+                <span className="font-mono-data rounded-full border border-[#233224] bg-[#101912] px-2 py-0.5 text-[10px] text-[#A3E635]">
+                  {`${totalSelected} ${totalSelected === 1 ? "item" : "itens"}`}
+                </span>
+              </div>
+
+              {totalSelected === 0 ? (
+                <p className="mt-4 text-xs leading-relaxed text-[#7D8C9F]">
+                  {"Selecione ao lado as soluções, áreas e fontes de dados para montar uma mensagem personalizada automaticamente."}
+                </p>
+              ) : (
+                <div className="mt-4 space-y-3 text-xs">
+                  {selected.solutions.length > 0 && (
+                    <div>
+                      <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#6E7E91]">
+                        {"Soluções"}
+                      </p>
+                      <p className="mt-0.5 text-[#E2E8F0]">
+                        {selected.solutions.join(" • ")}
+                      </p>
+                    </div>
+                  )}
+                  {selected.areas.length > 0 && (
+                    <div>
+                      <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#6E7E91]">
+                        {"Áreas envolvidas"}
+                      </p>
+                      <p className="mt-0.5 text-[#E2E8F0]">
+                        {selected.areas.join(" • ")}
+                      </p>
+                    </div>
+                  )}
+                  {selected.sources.length > 0 && (
+                    <div>
+                      <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#6E7E91]">
+                        {"Origem dos dados"}
+                      </p>
+                      <p className="mt-0.5 text-[#E2E8F0]">
+                        {selected.sources.join(" • ")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <a
+              href={buildWhatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="etp-cta-shimmer inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#A3E635] px-5 py-3 text-xs font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264]"
+            >
+              {"Enviar este escopo no WhatsApp ↗"}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const NAV_ITEMS = [
   { id: "solucoes", label: "Soluções" },
   { id: "dashboards", label: "Dashboards" },
@@ -1177,7 +1456,21 @@ return (<>
 </div>
 </section>
 
-<section id="contato" className="py-20 md:py-24">
+<section id="faq" className="border-b border-[#161E28] py-20 md:py-24">
+<div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+<Reveal>
+<div className="max-w-2xl">
+<p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"TIRE SUAS DÚVIDAS"}</p>
+<h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Perguntas frequentes antes de iniciar."}</h2>
+</div>
+</Reveal>
+<Reveal delay={100}>
+<FaqAccordion />
+</Reveal>
+</div>
+</section>
+
+<section id="contato" className="bg-[#0B0F14] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-3xl">
@@ -1185,7 +1478,8 @@ return (<>
 <h2 className="font-editorial mt-3 text-4xl leading-[1.06] text-[#F0F4F8] sm:text-5xl">{"\n            Vamos conversar sobre o próximo "}<span className="italic text-[#A3E635]">{"dashboard"}</span>{" da sua empresa.\n          "}</h2>
 <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{"Fale diretamente comigo pelos canais abaixo para discutirmos o projeto da sua empresa."}</p>
 </div>
-<div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
+<ScopeSimulator />
+<div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
 <a onMouseMove={handleSpotlightMove} href="https://wa.me/qr/Y7DYW352XXXZE1?s=v" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
 <SpotlightOverlay />
 <span aria-hidden style={{"borderColor":"rgba(163,230,53,0.45)"}} className="pointer-events-none absolute -inset-px rounded-2xl border opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
@@ -1222,4 +1516,20 @@ return (<>
 <a href="#inicio" className="text-[#A3E635] hover:text-[#BEF264]">{"Voltar ao topo ↑"}</a>
 </div>
 </footer>
+<a
+  href="https://wa.me/5511968394636?text=Ol%C3%A1%2C%20Gustavo!%20Vim%20pelo%20site%20da%20Elite%20Tech%20Pro%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto."
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Falar no WhatsApp da Elite Tech Pro"
+  className="etp-wa-pulse fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-[#A3E635]/60 bg-[#0D1218]/95 text-[#A3E635] shadow-[0_8px_28px_rgba(0,0,0,0.55),0_0_20px_rgba(163,230,53,0.18)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-[#A3E635] hover:text-[#090C10] sm:h-14 sm:w-14"
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    className="h-6 w-6"
+  >
+    <path d="M20.52 3.48A11.82 11.82 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.14 1.6 5.95L0 24l6.33-1.66a11.86 11.86 0 0 0 5.73 1.46h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.42Zm-8.46 18.3h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.76.99 1-3.66-.24-.38a9.86 9.86 0 0 1-1.52-5.24c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.9 7c0 5.45-4.44 9.87-9.87 9.87Zm5.42-7.41c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.48-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.21 5.09 4.5.71.31 1.27.49 1.7.63.72.23 1.37.2 1.88.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35Z" />
+  </svg>
+</a>
 </>);}
