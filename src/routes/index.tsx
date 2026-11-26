@@ -187,33 +187,27 @@ const proposals = (<>
 <article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319]">
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 01"}</span></div>
-<h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Projeto Pontual de BI"}</h3>
-<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Dashboard sob medida do zero até a publicação em nuvem."}</p>
-<div className="mt-5 space-y-1 border-y border-[#1C2530] py-4"><p className="text-xs font-semibold text-[#E2E8F0]"><span className="text-[#A3E635]">{"◷"}</span>{" Entrega em 2 a 4 semanas"}</p><p className="text-xs text-[#7D8C9F]">{"Escopo fechado • Pagamento por entrega"}</p></div>
-<p className="mt-4 text-xs leading-relaxed text-[#94A3B8]"><strong className="text-[#CBD5E1]">{"Ideal para: "}</strong>{"Empresas que precisam resolver uma área crítica rapidamente (ex: Financeiro, Vendas ou Logística)."}</p>
-<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Diagnóstico e mapeamento de KPIs estratégicos"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Conexão com ERP, SQL ou Excel"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Protótipo visual exclusivo no Figma"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Desenvolvimento completo em Power BI em nuvem"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Treinamento da equipe + documentação técnica"}</span></li></ul>
+<h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Dashboards em Power BI"}</h3>
+<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Painéis gerenciais sob medida, do tratamento dos dados à publicação."}</p>
+<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Layout executivo personalizado no Figma"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Conexão com SQL, Excel, Google Sheets ou ERP"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Modelagem de dados, Power Query e DAX avançado"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Publicação em nuvem e treinamento de uso"}</span></li></ul>
 </div>
-<Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors border border-[#2A3747] bg-[#131B24] text-[#F0F4F8] hover:border-[#A3E635]/60 hover:text-[#A3E635]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('projeto-pontual'); }}>{"Solicitar Proposta Pontual →"}</Button>
+<Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors border border-[#2A3747] bg-[#131B24] text-[#F0F4F8] hover:border-[#A3E635]/60 hover:text-[#A3E635]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('projeto-pontual'); }}>{"Solicitar Orçamento →"}</Button>
 </article>
 <article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#A3E635]/55 bg-[#101715]">
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 02"}</span><span className="rounded-full bg-[#A3E635] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#090C10]">{"Mais Escolhido"}</span></div>
 <h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Consultoria & BI Recorrente"}</h3>
-<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Seu departamento de Inteligência de Dados sob demanda, mês a mês."}</p>
-<div className="mt-5 space-y-1 border-y border-[#1C2530] py-4"><p className="text-xs font-semibold text-[#E2E8F0]"><span className="text-[#A3E635]">{"◷"}</span>{" Evolução contínua • SLA prioritário"}</p><p className="text-xs text-[#7D8C9F]">{"Contrato mensal previsível"}</p></div>
-<p className="mt-4 text-xs leading-relaxed text-[#94A3B8]"><strong className="text-[#CBD5E1]">{"Ideal para: "}</strong>{"Empresas em crescimento que desejam estruturar múltiplos setores e evoluir continuamente com dados."}</p>
-<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Criação contínua de novos dashboards por setor"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Manutenção e governança de pipelines SQL / Power BI"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Reuniões mensais de análise com a diretoria"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Suporte rápido para novos KPIs e regras"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Cultura Data-Driven sem custo de equipe CLT"}</span></li></ul>
+<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Evolução contínua dos seus indicadores e bases de dados mês a mês."}</p>
+<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Criação e atualização contínua de dashboards"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Manutenção de rotinas ETL e bancos SQL / PostgreSQL"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Criação de novos KPIs e ajustes sob demanda"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Suporte direto e acompanhamento periódico"}</span></li></ul>
 </div>
-<Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors bg-[#A3E635] text-[#090C10] hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('consultoria-recorrente'); }}>{"Solicitar Plano Recorrente →"}</Button>
+<Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors bg-[#A3E635] text-[#090C10] hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('consultoria-recorrente'); }}>{"Falar sobre Recorrência →"}</Button>
 </article>
 <article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319]">
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 03"}</span></div>
-<h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Automação & Integrações"}</h3>
-<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Elimine planilhas manuais conectando ERP, CRM, APIs e WhatsApp."}</p>
-<div className="mt-5 space-y-1 border-y border-[#1C2530] py-4"><p className="text-xs font-semibold text-[#E2E8F0]"><span className="text-[#A3E635]">{"◷"}</span>{" Entrega em 1 a 3 semanas"}</p><p className="text-xs text-[#7D8C9F]">{"Por fluxo ou pacote de automações"}</p></div>
-<p className="mt-4 text-xs leading-relaxed text-[#94A3B8]"><strong className="text-[#CBD5E1]">{"Ideal para: "}</strong>{"Operações que perdem horas toda semana copiando dados entre sistemas e montando relatórios manuais."}</p>
-<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Mapeamento de gargalos e ganho de tempo"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Fluxos automatizados em n8n e Python"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Integração via API entre CRM, ERP e bancos"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Alertas automáticos via WhatsApp ou e-mail"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Monitoramento de estabilidade e treinamento"}</span></li></ul>
+<h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Automações & Soluções Web"}</h3>
+<p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Elimine tarefas manuais e centralize processos da sua operação."}</p>
+<ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Fluxos automatizados com n8n, Power Automate e Python"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Integração de dados entre sistemas e planilhas"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Alertas e relatórios automáticos por WhatsApp ou e-mail"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Aplicações internas com Power Apps ou portais web"}</span></li></ul>
 </div>
 <Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors border border-[#2A3747] bg-[#131B24] text-[#F0F4F8] hover:border-[#A3E635]/60 hover:text-[#A3E635]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('automacao-integracoes'); }}>{"Solicitar Automação →"}</Button>
 </article>
@@ -307,28 +301,6 @@ return (<>
 </div>
 </div>
 <div className="mt-12 grid gap-6 lg:grid-cols-3" id="proposals-grid">{proposals}</div>
-<div className="mt-10 overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218]">
-<div className="border-b border-[#1A232F] px-6 py-4"><h3 className="text-sm font-semibold text-[#F0F4F8]">{"Comparativo Rápido dos Modelos"}</h3></div>
-<div className="overflow-x-auto">
-<table className="w-full min-w-[600px] text-left text-xs">
-<thead >
-<tr className="border-b border-[#1A232F] bg-[#0A0E13] text-[#7D8C9F]">
-<th className="px-6 py-3.5 font-medium">{"Entregável / Recurso"}</th>
-<th className="px-4 py-3.5 font-medium">{"Projeto Pontual"}</th>
-<th className="px-4 py-3.5 font-semibold text-[#A3E635]">{"Consultoria Recorrente"}</th>
-<th className="px-4 py-3.5 font-medium">{"Automação & APIs"}</th>
-</tr>
-</thead>
-<tbody className="divide-y divide-[#17202B] text-[#CBD5E1]">
-<tr className="hover:bg-[#111720]/70"><td className="px-6 py-3.5 font-medium text-[#E2E8F0]">{"Diagnóstico técnico inicial gratuito"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Incluso"}</td><td className="px-4 py-3.5 font-medium text-[#D9F99D]">{"Incluso"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Incluso"}</td></tr>
-<tr className="hover:bg-[#111720]/70"><td className="px-6 py-3.5 font-medium text-[#E2E8F0]">{"Design executivo personalizado no Figma"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Incluso"}</td><td className="px-4 py-3.5 font-medium text-[#D9F99D]">{"Contínuo"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Opcional"}</td></tr>
-<tr className="hover:bg-[#111720]/70"><td className="px-6 py-3.5 font-medium text-[#E2E8F0]">{"Integração com ERP, SQL, CRM e APIs"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"1 a 3 fontes"}</td><td className="px-4 py-3.5 font-medium text-[#D9F99D]">{"Multi-fontes"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Foco principal"}</td></tr>
-<tr className="hover:bg-[#111720]/70"><td className="px-6 py-3.5 font-medium text-[#E2E8F0]">{"Alertas automáticos (WhatsApp / E-mail)"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Opcional"}</td><td className="px-4 py-3.5 font-medium text-[#D9F99D]">{"Incluso"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Incluso"}</td></tr>
-<tr className="hover:bg-[#111720]/70"><td className="px-6 py-3.5 font-medium text-[#E2E8F0]">{"Acompanhamento e novos KPIs mensais"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"30 dias garantia"}</td><td className="px-4 py-3.5 font-medium text-[#D9F99D]">{"Mensal contínuo"}</td><td className="px-4 py-3.5 text-[#94A3B8]">{"Sob demanda"}</td></tr>
-</tbody>
-</table>
-</div>
-</div>
 </div>
 </section>
 
