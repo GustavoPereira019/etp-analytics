@@ -384,7 +384,7 @@ return (<>
 </div>
 <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
 <a href="https://wa.me/qr/Y7DYW352XXXZE1?s=v" target="_blank" rel="noopener noreferrer" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
-<span aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl border border-[#A3E635]/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
+<span aria-hidden style={{"borderColor":"rgba(163,230,53,0.45)"}} className="pointer-events-none absolute -inset-px rounded-2xl border opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"WHATSAPP DIRETO"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"(11) 96839-4636"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
