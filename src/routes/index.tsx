@@ -227,14 +227,118 @@ function SpotlightOverlay() {
   );
 }
 
-function AuroraBackground() {
+function BiTelemetryBackground({
+  layerRef,
+}: {
+  layerRef: { current: HTMLDivElement | null };
+}) {
   return (
     <div
-      aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#090C10]"
     >
-      <div className="etp-aurora-lime absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full bg-[#A3E635]/[0.14] blur-[130px] sm:h-[640px] sm:w-[640px]" />
-      <div className="etp-aurora-cyan absolute -bottom-28 -right-28 h-[440px] w-[440px] rounded-full bg-[#0EA5E9]/[0.15] blur-[130px] sm:h-[620px] sm:w-[620px]" />
+      {/* Grade técnica fina com eixos discretos */}
+      <div className="etp-bi-grid absolute inset-0 opacity-90" />
+
+      {/* Gráficos fantasma de BI / Telemetria com parallax leve no scroll */}
+      <div
+        ref={layerRef}
+        className="absolute -inset-y-24 inset-x-0 will-change-transform"
+      >
+        {/* Top-left: Sparkline de tendência + eixos */}
+        <svg
+          viewBox="0 0 520 220"
+          fill="none"
+          className="absolute left-[-2%] top-[6%] w-[440px] max-w-[75vw] opacity-[0.065] sm:w-[540px]"
+        >
+          <line x1="28" y1="20" x2="28" y2="192" stroke="#94A3B8" strokeWidth="1" />
+          <line x1="28" y1="192" x2="500" y2="192" stroke="#94A3B8" strokeWidth="1" />
+          <line x1="28" y1="64" x2="500" y2="64" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
+          <line x1="28" y1="108" x2="500" y2="108" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
+          <line x1="28" y1="152" x2="500" y2="152" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="4 6" />
+          <polyline
+            points="36,164 92,150 148,156 204,126 260,134 316,96 372,102 428,68 488,42"
+            stroke="#A3E635"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <polyline
+            points="36,178 92,172 148,166 204,158 260,148 316,142 372,130 428,124 488,112"
+            stroke="#CBD5E1"
+            strokeWidth="1"
+            strokeDasharray="3 4"
+          />
+          {[
+            [92, 150],
+            [204, 126],
+            [316, 96],
+            [428, 68],
+            [488, 42],
+          ].map(([cx, cy], idx) => (
+            <circle key={idx} cx={cx} cy={cy} r="3" fill="#A3E635" />
+          ))}
+        </svg>
+
+        {/* Mid-right: Gráfico de colunas minimalista + marcações de eixo */}
+        <svg
+          viewBox="0 0 420 200"
+          fill="none"
+          className="absolute right-[-2%] top-[38%] w-[360px] max-w-[70vw] opacity-[0.06] sm:w-[440px]"
+        >
+          <line x1="24" y1="172" x2="396" y2="172" stroke="#94A3B8" strokeWidth="1" />
+          <line x1="24" y1="128" x2="396" y2="128" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
+          <line x1="24" y1="84" x2="396" y2="84" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
+          <line x1="24" y1="40" x2="396" y2="40" stroke="#94A3B8" strokeWidth="0.75" strokeDasharray="3 6" />
+          {[
+            { x: 42, h: 48, hi: false },
+            { x: 80, h: 72, hi: false },
+            { x: 118, h: 62, hi: false },
+            { x: 156, h: 98, hi: true },
+            { x: 194, h: 84, hi: false },
+            { x: 232, h: 116, hi: true },
+            { x: 270, h: 92, hi: false },
+            { x: 308, h: 132, hi: true },
+            { x: 346, h: 146, hi: true },
+          ].map((bar) => (
+            <rect
+              key={bar.x}
+              x={bar.x}
+              y={172 - bar.h}
+              width="22"
+              height={bar.h}
+              rx="2"
+              fill={bar.hi ? "#A3E635" : "#94A3B8"}
+              fillOpacity={bar.hi ? "0.7" : "0.45"}
+            />
+          ))}
+        </svg>
+
+        {/* Bottom-left: Curva de telemetria em degraus + eixos */}
+        <svg
+          viewBox="0 0 480 180"
+          fill="none"
+          className="absolute bottom-[8%] left-[3%] w-[380px] max-w-[75vw] opacity-[0.055] sm:w-[480px]"
+        >
+          <line x1="20" y1="154" x2="460" y2="154" stroke="#94A3B8" strokeWidth="1" />
+          <line x1="20" y1="24" x2="20" y2="154" stroke="#94A3B8" strokeWidth="1" />
+          {[80, 140, 200, 260, 320, 380, 440].map((x) => (
+            <line key={x} x1={x} y1="154" x2={x} y2="160" stroke="#94A3B8" strokeWidth="1" />
+          ))}
+          <polyline
+            points="20,136 80,136 80,118 140,118 140,124 200,124 200,96 260,96 260,82 320,82 320,64 380,64 380,46 456,46"
+            stroke="#A3E635"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <polyline
+            points="20,144 140,132 260,114 380,90 456,74"
+            stroke="#CBD5E1"
+            strokeWidth="1"
+            strokeDasharray="4 5"
+          />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -720,7 +824,7 @@ function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
   return (
     <div
       onMouseMove={handleSpotlightMove}
-      className="group/spot relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8 lg:p-10"
+      className="group/spot relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8 lg:p-10"
     >
       <SpotlightOverlay />
       <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
@@ -871,7 +975,7 @@ function FaqAccordion() {
             className={`group/spot relative overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300 ${
               isOpen
                 ? "border-[#A3E635]/45 bg-[#0F1914]/75"
-                : "border-white/10 bg-[#0B0F14]/70 hover:border-white/20"
+                : "border-white/10 bg-[#0B0F14]/75 hover:border-white/20"
             }`}
           >
             <SpotlightOverlay />
@@ -992,7 +1096,7 @@ function ScopeSimulator() {
   return (
     <div
       onMouseMove={handleSpotlightMove}
-      className="group/spot relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8"
+      className="group/spot relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8"
     >
       <SpotlightOverlay />
       <div className="relative z-10">
@@ -1128,7 +1232,8 @@ const [scrolled, setScrolled] = useState(false);
 const [scrollProgress, setScrollProgress] = useState(0);
 const [activeSection, setActiveSection] = useState<string>("");
 const [methodLineVisible, setMethodLineVisible] = useState(false);
-const heroGlowRef = useRef<HTMLDivElement | null>(null);
+const [founderImgFailed, setFounderImgFailed] = useState(false);
+const telemetryLayerRef = useRef<HTMLDivElement | null>(null);
 const heroGridRef = useRef<HTMLDivElement | null>(null);
 const founderContainerRef = useRef<HTMLDivElement | null>(null);
 const founderImgRef = useRef<HTMLImageElement | null>(null);
@@ -1148,12 +1253,12 @@ useEffect(() => {
     setScrollProgress(maxScroll > 0 ? Math.min(Math.max((y / maxScroll) * 100, 0), 100) : 0);
 
     if (!reducedMotion()) {
-      if (heroGlowRef.current) {
-        const glowOffset = Math.min(y * 0.16, 120);
-        heroGlowRef.current.style.transform = `translate3d(0, ${glowOffset.toFixed(1)}px, 0)`;
+      if (telemetryLayerRef.current) {
+        const telemetryOffset = Math.max(-90, Math.min(90, -y * 0.04));
+        telemetryLayerRef.current.style.transform = `translate3d(0, ${telemetryOffset.toFixed(1)}px, 0)`;
       }
       if (heroGridRef.current) {
-        const gridOffset = Math.min(y * 0.09, 80);
+        const gridOffset = Math.min(y * 0.08, 72);
         heroGridRef.current.style.transform = `translate3d(0, ${gridOffset.toFixed(1)}px, 0)`;
       }
       if (founderContainerRef.current && founderImgRef.current) {
@@ -1232,7 +1337,7 @@ const heroTrend = ({"financeiro":(<> <defs ><linearGradient id="hg" x1="0" y1="0
 const heroSubtitle = {"financeiro": "DRE Gerencial & Margem EBITDA", "comercial": "Funil de Vendas & Metas por Canal", "operacoes": "SLA Logístico, Frota & Eficiência"}[activeHero];
 const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": "Sincronizado com CRM • Tempo Real", "operacoes": "Pipeline Python + Power BI"}[activeHero];
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
-const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
+const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
 const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
@@ -1399,7 +1504,7 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 </DashboardCard></Reveal>)} </>);
 const proposals = (<> 
 <Reveal delay={0} className="flex">
-<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
 <SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 01"}</span></div>
@@ -1423,7 +1528,7 @@ const proposals = (<>
 </article>
 </Reveal>
 <Reveal delay={200} className="flex">
-<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
 <SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 03"}</span></div>
@@ -1437,7 +1542,7 @@ const proposals = (<>
  </>);
 return (<>
 
-<AuroraBackground />
+<BiTelemetryBackground layerRef={telemetryLayerRef} />
 
 <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-transparent">
 <div className="h-full w-full origin-left bg-[#A3E635] transition-transform duration-75 ease-out" style={{ transform: `scaleX(${scrollProgress / 100})` }} />
@@ -1480,15 +1585,6 @@ return (<>
 <main className="relative z-10">
 
 <section id="inicio" className="relative overflow-hidden bg-transparent">
-<div
-  ref={heroGlowRef}
-  aria-hidden
-  className="pointer-events-none absolute -inset-x-0 -top-16 -bottom-16 will-change-transform"
-  style={{
-    background:
-      "radial-gradient(62% 52% at 14% 16%, rgba(132, 204, 22, 0.09) 0%, rgba(77, 124, 15, 0.025) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(48% 42% at 88% 24%, rgba(14, 165, 233, 0.075) 0%, rgba(9, 12, 16, 0) 70%)",
-  }}
-/>
 <div
   ref={heroGridRef}
   aria-hidden
@@ -1622,10 +1718,10 @@ return (<>
 <div className={`h-full w-full origin-left bg-gradient-to-r from-[#0EA5E9]/70 via-[#A3E635] to-[#A3E635] transition-transform duration-1000 ease-out ${methodLineVisible ? "scale-x-100" : "scale-x-0"}`} />
 </div>
 <div className="relative z-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-<Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 </div>
 </div>
 </div>
@@ -1645,8 +1741,21 @@ return (<>
 <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
 
 <div className="lg:col-span-5">
-<div ref={founderContainerRef} className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
-<img ref={founderImgRef} src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da Elite Tech Pro" className="absolute inset-0 h-full min-h-[460px] w-full scale-[1.06] object-cover object-top will-change-transform" />
+<div ref={founderContainerRef} className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 backdrop-blur-md">
+{founderImgFailed ? (
+  <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B1016] text-center">
+    <span className="font-editorial text-5xl text-[#A3E635]">{"GP"}</span>
+    <span className="font-mono-data mt-2 text-[10px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"Elite Tech Pro"}</span>
+  </div>
+) : (
+  <img
+    ref={founderImgRef}
+    src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg"
+    alt="Gustavo Pereira — Fundador da Elite Tech Pro"
+    onError={() => setFounderImgFailed(true)}
+    className="absolute inset-0 h-full min-h-[460px] w-full scale-[1.06] object-cover object-top will-change-transform"
+  />
+)}
 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
 <div className="absolute inset-x-0 bottom-0 p-6">
 <p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador • Elite Tech Pro"}</p>
