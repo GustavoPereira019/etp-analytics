@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Inteligência de Dados, BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
 
@@ -25,28 +25,35 @@ function Reveal({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.12) {
             setVisible(true);
-            observer.disconnect();
-            break;
+          } else if (!entry.isIntersecting) {
+            setVisible(false);
           }
         }
       },
-      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+      { threshold: [0, 0.12], rootMargin: "0px 0px -24px 0px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
+  const isFlex = className.includes("flex");
+
   return (
-    <div
-      ref={ref}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-      } ${className}`}
-    >
-      {children}
+    <div ref={ref} className={className}>
+      <div
+        style={visible && delay ? { transitionDelay: `${delay}ms` } : undefined}
+        className={`h-full w-full transition-all duration-700 ease-out will-change-transform ${
+          isFlex ? "flex" : ""
+        } ${
+          visible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-8 scale-[0.97]"
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -64,16 +71,17 @@ function AnimatedCounter({
 }) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const [value, setValue] = useState(0);
-  const started = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || started.current) return;
+    if (!el) return;
 
     let rafId = 0;
+    let active = false;
+
     const startAnimation = () => {
-      if (started.current) return;
-      started.current = true;
+      if (active) return;
+      active = true;
       if (
         typeof window !== "undefined" &&
         window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
@@ -93,6 +101,15 @@ function AnimatedCounter({
       rafId = requestAnimationFrame(tick);
     };
 
+    const resetAnimation = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+      active = false;
+      setValue(0);
+    };
+
     if (typeof IntersectionObserver === "undefined") {
       startAnimation();
       return;
@@ -101,14 +118,14 @@ function AnimatedCounter({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
             startAnimation();
-            observer.disconnect();
-            break;
+          } else if (!entry.isIntersecting) {
+            resetAnimation();
           }
         }
       },
-      { threshold: 0.2 },
+      { threshold: [0, 0.2] },
     );
     observer.observe(el);
 
@@ -124,6 +141,70 @@ function AnimatedCounter({
       {value}
       {suffix}
     </span>
+  );
+}
+
+function DashboardCard({ children }: { children: ReactNode }) {
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.15) {
+            setInView(true);
+          } else if (!entry.isIntersecting) {
+            setInView(false);
+          }
+        }
+      },
+      { threshold: [0, 0.15] },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleMouseMove = (e: MouseEvent<HTMLElement>) => {
+    if (
+      typeof window === "undefined" ||
+      !window.matchMedia?.("(pointer: fine)").matches ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const rotateY = Math.max(-4, Math.min(4, x * 8));
+    const rotateX = Math.max(-4, Math.min(4, -y * 8));
+    el.style.transition = "transform 100ms ease-out, border-color 0.2s ease, background-color 0.2s ease";
+    el.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+  };
+
+  const handleMouseLeave = (e: MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    el.style.transition = "transform 450ms cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, background-color 0.2s ease";
+    el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+  };
+
+  return (
+    <article
+      ref={cardRef}
+      data-in-view={inView ? "true" : "false"}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="etp-card etp-dash-card group flex w-full flex-col overflow-hidden rounded-2xl text-left will-change-transform"
+    >
+      {children}
+    </article>
   );
 }
 
@@ -146,19 +227,59 @@ function SpotlightOverlay() {
   );
 }
 
+const NAV_ITEMS = [
+  { id: "solucoes", label: "Soluções" },
+  { id: "dashboards", label: "Dashboards" },
+  { id: "propostas", label: "Propostas" },
+  { id: "processo", label: "Processo" },
+  { id: "sobre", label: "Fundador" },
+  { id: "contato", label: "Contato" },
+] as const;
+
 function Index(){
 const [activeHero,setHero]=useState("financeiro"); const [activeCat,setCat]=useState("Todos");
 const [scrolled, setScrolled] = useState(false);
 const [scrollProgress, setScrollProgress] = useState(0);
+const [activeSection, setActiveSection] = useState<string>("");
+const [methodLineVisible, setMethodLineVisible] = useState(false);
+const heroGlowRef = useRef<HTMLDivElement | null>(null);
+const heroGridRef = useRef<HTMLDivElement | null>(null);
+const founderContainerRef = useRef<HTMLDivElement | null>(null);
+const founderImgRef = useRef<HTMLImageElement | null>(null);
+const methodRef = useRef<HTMLDivElement | null>(null);
 
 useEffect(() => {
   let rafId = 0;
+  const reducedMotion = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
   const updateScroll = () => {
     rafId = 0;
     const y = window.scrollY;
     setScrolled(y > 20);
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     setScrollProgress(maxScroll > 0 ? Math.min(Math.max((y / maxScroll) * 100, 0), 100) : 0);
+
+    if (!reducedMotion()) {
+      if (heroGlowRef.current) {
+        const glowOffset = Math.min(y * 0.16, 120);
+        heroGlowRef.current.style.transform = `translate3d(0, ${glowOffset.toFixed(1)}px, 0)`;
+      }
+      if (heroGridRef.current) {
+        const gridOffset = Math.min(y * 0.09, 80);
+        heroGridRef.current.style.transform = `translate3d(0, ${gridOffset.toFixed(1)}px, 0)`;
+      }
+      if (founderContainerRef.current && founderImgRef.current) {
+        const rect = founderContainerRef.current.getBoundingClientRect();
+        const vh = window.innerHeight || 1;
+        if (rect.bottom >= 0 && rect.top <= vh) {
+          const progress = (rect.top + rect.height / 2 - vh / 2) / vh;
+          const imgOffset = Math.max(-18, Math.min(18, progress * -28));
+          founderImgRef.current.style.transform = `translate3d(0, ${imgOffset.toFixed(1)}px, 0) scale(1.06)`;
+        }
+      }
+    }
   };
   const onScroll = () => {
     if (!rafId) rafId = requestAnimationFrame(updateScroll);
@@ -172,6 +293,51 @@ useEffect(() => {
     if (rafId) cancelAnimationFrame(rafId);
   };
 }, []);
+
+useEffect(() => {
+  if (typeof IntersectionObserver === "undefined") return;
+  const ids = ["inicio", ...NAV_ITEMS.map((item) => item.id)];
+  const elements = ids
+    .map((id) => document.getElementById(id))
+    .filter((el): el is HTMLElement => Boolean(el));
+  if (!elements.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id === "inicio" ? "" : entry.target.id);
+        }
+      }
+    },
+    { rootMargin: "-35% 0px -55% 0px", threshold: 0 },
+  );
+  elements.forEach((el) => observer.observe(el));
+  return () => observer.disconnect();
+}, []);
+
+useEffect(() => {
+  const el = methodRef.current;
+  if (!el) return;
+  if (typeof IntersectionObserver === "undefined") {
+    setMethodLineVisible(true);
+    return;
+  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+          setMethodLineVisible(true);
+        } else if (!entry.isIntersecting) {
+          setMethodLineVisible(false);
+        }
+      }
+    },
+    { threshold: [0, 0.2] },
+  );
+  observer.observe(el);
+  return () => observer.disconnect();
+}, []);
 function selectProposalAndScroll(_id?:string){document.getElementById("contato")?.scrollIntoView({behavior:"smooth"});}
 const heroButtons = ({"financeiro":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>),"comercial":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>),"operacoes":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>)})[activeHero];
 const heroKpis = ({"financeiro":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Receita Líquida"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"R$ 2,84M"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +18,4%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Margem EBITDA"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"27,6%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +3,2 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Inadimplência"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"1,9%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ -0,8 pp"}</p></div> </>),"comercial":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Meta Atingida"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"114,2%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +14,2%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Ticket Médio"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"R$ 18,9k"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +9,6%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Conversão"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"31,4%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +4,1 pp"}</p></div> </>),"operacoes":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Entregas OTIF"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"96,8%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +5,4 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"OEE Médio"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"84,5%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +6,1 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Horas Manuais"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"-72%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ Automação"}</p></div> </>)})[activeHero];
@@ -182,11 +348,11 @@ const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": 
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
 const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
-const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OTIF"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"96,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Custo/Km"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 3,42"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Entregas"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4.820"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "55%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "72%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "77%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "51%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "64%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "79%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "55%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "72%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "100%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "77%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "51%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "64%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "79%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,35.5 22.0,31.2 44.0,26.2 66.0,28.3 88.0,19.7 110.0,15.4 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,35.5 22.0,31.2 44.0,26.2 66.0,28.3 88.0,19.7 110.0,15.4"></polyline></svg></div>
 </div>
 </div>
@@ -200,11 +366,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={60} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={60} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Headcount"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"412"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Turnover"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"2,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Absenteísmo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "89%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "48%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "75%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "61%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "69%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "80%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "66%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "89%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "48%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "75%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "61%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "69%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "80%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "66%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,33.4 22.0,31.9 44.0,29.0 66.0,23.3 88.0,25.4 110.0,17.5 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,33.4 22.0,31.9 44.0,29.0 66.0,23.3 88.0,25.4 110.0,17.5"></polyline></svg></div>
 </div>
 </div>
@@ -218,11 +384,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<Reveal delay={120} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<Reveal delay={120} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Ocupação"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"87,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Média Perm."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4,1 d"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Triagem"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"94%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "51%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "71%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "84%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "93%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "51%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "71%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "84%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "93%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "76%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,30.5 22.0,25.4 44.0,24.0 66.0,19.7 88.0,21.1 110.0,14.6 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,30.5 22.0,25.4 44.0,24.0 66.0,19.7 88.0,21.1 110.0,14.6"></polyline></svg></div>
 </div>
 </div>
@@ -236,11 +402,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={180} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={180} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OEE Global"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"84,6%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Refugo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,3%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Disponib."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"92,1%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "64%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "79%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "53%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "92%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "73%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "86%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "64%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "79%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "53%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "92%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "73%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "86%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,34.1 22.0,29.8 44.0,24.7 66.0,22.6 88.0,17.5 110.0,16.1 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,34.1 22.0,29.8 44.0,24.7 66.0,22.6 88.0,17.5 110.0,16.1"></polyline></svg></div>
 </div>
 </div>
@@ -254,11 +420,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={240} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={240} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Faturamento"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 1,92M"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Meta"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"112%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"29,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "96%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "74%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "61%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "48%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "96%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "67%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "59%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "74%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "61%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "48%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,34.8 22.0,28.3 44.0,25.4 66.0,19.7 88.0,15.4 110.0,10.3 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,34.8 22.0,28.3 44.0,25.4 66.0,19.7 88.0,15.4 110.0,10.3"></polyline></svg></div>
 </div>
 </div>
@@ -272,11 +438,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={300} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={300} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"TMA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"3m 42s"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Nível Serv."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"91,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"18,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "83%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "87%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "83%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "67%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "87%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "70%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,29.8 22.0,26.9 44.0,28.3 66.0,21.8 88.0,19.0 110.0,13.9 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,29.8 22.0,26.9 44.0,28.3 66.0,21.8 88.0,19.0 110.0,13.9"></polyline></svg></div>
 </div>
 </div>
@@ -290,11 +456,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={360} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={360} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Avanço Fís."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"68,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Desvio Orç."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"-1,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Medições"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 4,6M"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "93%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "84%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "77%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "68%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "50%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "89%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "93%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "84%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "77%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "68%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "59%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "50%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "89%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,36.2 22.0,31.9 44.0,26.9 66.0,21.8 88.0,19.0 110.0,16.8 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,36.2 22.0,31.9 44.0,26.9 66.0,21.8 88.0,19.0 110.0,16.8"></polyline></svg></div>
 </div>
 </div>
@@ -308,11 +474,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={420} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={420} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Interno"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"95,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Backlog"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"34"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Eficiência"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"89%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "63%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "71%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "80%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "85%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "90%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "63%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "71%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "76%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "80%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "85%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "90%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "100%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,33.4 22.0,29.8 44.0,26.2 66.0,23.3 88.0,18.2 110.0,13.2 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,33.4 22.0,29.8 44.0,26.2 66.0,23.3 88.0,18.2 110.0,13.2"></polyline></svg></div>
 </div>
 </div>
@@ -326,11 +492,11 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={480} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
+</DashboardCard></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={480} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"EBITDA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"26,8%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Caixa Proj."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 890k"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Margem Líq."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"19,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "83%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "87%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%", "--bar-i": 0} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%", "--bar-i": 1} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%", "--bar-i": 2} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "59%", "--bar-i": 3} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "67%", "--bar-i": 4} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "83%", "--bar-i": 5} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "87%", "--bar-i": 6} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "76%", "--bar-i": 7} as CSSProperties} className="etp-mini-bar w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,32.6 22.0,27.6 44.0,24.7 66.0,20.4 88.0,17.5 110.0,11.8 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,32.6 22.0,27.6 44.0,24.7 66.0,20.4 88.0,17.5 110.0,11.8"></polyline></svg></div>
 </div>
 </div>
@@ -344,7 +510,7 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <a href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article></Reveal>)} </>);
+</DashboardCard></Reveal>)} </>);
 const proposals = (<> 
 <Reveal delay={0} className="flex">
 <article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319] transition-all duration-300 hover:-translate-y-1">
@@ -367,7 +533,7 @@ const proposals = (<>
 <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{"Evolução contínua dos seus indicadores e bases de dados mês a mês."}</p>
 <ul className="mt-5 space-y-2.5"><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Criação e atualização contínua de dashboards"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Manutenção de rotinas ETL e bancos SQL / PostgreSQL"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Criação de novos KPIs e ajustes sob demanda"}</span></li><li className="flex items-start gap-2 text-xs text-[#CBD5E1]"><span className="text-[#A3E635]">{"✓"}</span><span >{"Suporte direto e acompanhamento periódico"}</span></li></ul>
 </div>
-<Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors bg-[#A3E635] text-[#090C10] hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('consultoria-recorrente'); }}>{"Falar sobre Recorrência →"}</Button>
+<Button type="button" className="etp-cta-shimmer mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors bg-[#A3E635] text-[#090C10] hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('consultoria-recorrente'); }}>{"Falar sobre Recorrência →"}</Button>
 </article>
 </Reveal>
 <Reveal delay={200} className="flex">
@@ -399,20 +565,48 @@ return (<>
 </div>
 </a>
 <nav className="hidden items-center gap-7 md:flex">
-<a href="#solucoes" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Soluções"}</a>
-<a href="#dashboards" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Dashboards"}</a>
-<a href="#propostas" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Propostas"}</a>
-<a href="#processo" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Processo"}</a>
-<a href="#sobre" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Fundador"}</a>
-<a href="#contato" className="text-xs font-medium text-[#94A3B8] hover:text-[#F0F4F8]">{"Contato"}</a>
+{NAV_ITEMS.map((item) => {
+  const isActive = activeSection === item.id;
+  return (
+    <a
+      key={item.id}
+      href={`#${item.id}`}
+      className={`relative py-1 text-xs font-medium transition-colors ${
+        isActive ? "text-[#A3E635]" : "text-[#94A3B8] hover:text-[#F0F4F8]"
+      }`}
+    >
+      {item.label}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-x-0 -bottom-0.5 h-[2px] rounded-full bg-[#A3E635] transition-all duration-300 ${
+          isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
+        }`}
+      />
+    </a>
+  );
+})}
 </nav>
-<Button type="button" className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#A3E635] px-4 py-2 text-xs font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('diagnostico-gratuito'); }}>{"\n        Diagnóstico Gratuito ↗\n      "}</Button>
+<Button type="button" className="etp-cta-shimmer inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#A3E635] px-4 py-2 text-xs font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('diagnostico-gratuito'); }}>{"\n        Diagnóstico Gratuito ↗\n      "}</Button>
 </div>
 </header>
 <main >
 
-<section id="inicio" className="etp-hero-atmosphere border-b border-[#161E28]" style={{"background":"radial-gradient(62% 52% at 14% 12%, rgba(132, 204, 22, 0.055) 0%, rgba(77, 124, 15, 0.018) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 22%, rgba(163, 230, 53, 0.022) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)"}}>
-<div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
+<section id="inicio" className="relative overflow-hidden border-b border-[#161E28] bg-[#090C10]">
+<div
+  ref={heroGlowRef}
+  aria-hidden
+  className="pointer-events-none absolute -inset-x-0 -top-16 -bottom-16 will-change-transform"
+  style={{
+    background:
+      "radial-gradient(62% 52% at 14% 16%, rgba(132, 204, 22, 0.085) 0%, rgba(77, 124, 15, 0.025) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 24%, rgba(163, 230, 53, 0.035) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)",
+  }}
+/>
+<div
+  ref={heroGridRef}
+  aria-hidden
+  className="etp-dot-grid pointer-events-none absolute -inset-x-0 -top-16 -bottom-16 will-change-transform"
+/>
+<div className="relative z-10 mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
 <Reveal>
 <div className="mx-auto max-w-4xl text-center">
 <p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              INTELIGÊNCIA DE DADOS, BI & AUTOMAÇÃO • TODOS OS SEGMENTOS\n            "}</p>
@@ -499,11 +693,16 @@ return (<>
 <h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Do dado bruto à decisão estratégica em quatro etapas."}</h2>
 </div>
 </Reveal>
-<div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+<div ref={methodRef} className="relative mt-12">
+<div aria-hidden className="pointer-events-none absolute left-[12%] right-[12%] top-11 z-0 hidden h-[2px] overflow-hidden rounded-full bg-[#1C2530] lg:block">
+<div className={`h-full w-full origin-left bg-gradient-to-r from-[#A3E635]/40 via-[#A3E635] to-[#A3E635] transition-transform duration-1000 ease-out ${methodLineVisible ? "scale-x-100" : "scale-x-0"}`} />
+</div>
+<div className="relative z-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 <Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 <Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 <Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 <Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+</div>
 </div>
 </div>
 </section>
@@ -521,8 +720,8 @@ return (<>
 <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
 
 <div className="lg:col-span-5">
-<div className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
-<img src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da Elite Tech Pro" className="absolute inset-0 h-full min-h-[460px] w-full object-cover object-top" />
+<div ref={founderContainerRef} className="relative h-full min-h-[460px] overflow-hidden rounded-2xl border border-[#222D3A] bg-[#0A0D12]">
+<img ref={founderImgRef} src="https://i.ibb.co/ycQ0dWr9/gustavo.jpg" alt="Gustavo Pereira — Fundador da Elite Tech Pro" className="absolute inset-0 h-full min-h-[460px] w-full scale-[1.06] object-cover object-top will-change-transform" />
 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
 <div className="absolute inset-x-0 bottom-0 p-6">
 <p className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#A3E635]">{"Fundador • Elite Tech Pro"}</p>
