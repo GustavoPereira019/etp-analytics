@@ -1,9 +1,177 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({head:()=>({meta:[{title:"Elite Tech Pro — Inteligência de Dados, BI & Automação"},{name:"description",content:"Inteligência de dados, dashboards Power BI e automações sob medida com Gustavo Pereira."},{property:"og:title",content:"Elite Tech Pro — Inteligência de Dados"},{property:"og:description",content:"Power BI, SQL, Python e n8n para decisões precisas na sua empresa."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
+
+function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+      className={`transition-all duration-700 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function AnimatedCounter({
+  target,
+  prefix = "",
+  suffix = "",
+  duration = 1200,
+}: {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  duration?: number;
+}) {
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const [value, setValue] = useState(0);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || started.current) return;
+
+    let rafId = 0;
+    const startAnimation = () => {
+      if (started.current) return;
+      started.current = true;
+      if (
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ) {
+        setValue(target);
+        return;
+      }
+      const startTime = performance.now();
+      const tick = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(eased * target));
+        if (progress < 1) {
+          rafId = requestAnimationFrame(tick);
+        }
+      };
+      rafId = requestAnimationFrame(tick);
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      startAnimation();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            startAnimation();
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [target, duration]);
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {value}
+      {suffix}
+    </span>
+  );
+}
+
+function handleSpotlightMove(e: MouseEvent<HTMLElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+  e.currentTarget.style.setProperty("--my", `${e.clientY - rect.top}px`);
+}
+
+function SpotlightOverlay() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover/spot:opacity-100"
+      style={{
+        background:
+          "radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(163, 230, 53, 0.085), transparent 65%)",
+      }}
+    />
+  );
+}
+
 function Index(){
 const [activeHero,setHero]=useState("financeiro"); const [activeCat,setCat]=useState("Todos");
+const [scrolled, setScrolled] = useState(false);
+const [scrollProgress, setScrollProgress] = useState(0);
+
+useEffect(() => {
+  let rafId = 0;
+  const updateScroll = () => {
+    rafId = 0;
+    const y = window.scrollY;
+    setScrolled(y > 20);
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    setScrollProgress(maxScroll > 0 ? Math.min(Math.max((y / maxScroll) * 100, 0), 100) : 0);
+  };
+  const onScroll = () => {
+    if (!rafId) rafId = requestAnimationFrame(updateScroll);
+  };
+  updateScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+  return () => {
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
+    if (rafId) cancelAnimationFrame(rafId);
+  };
+}, []);
 function selectProposalAndScroll(_id?:string){document.getElementById("contato")?.scrollIntoView({behavior:"smooth"});}
 const heroButtons = ({"financeiro":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>),"comercial":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>),"operacoes":(<> <Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('financeiro'); }}>{"Financeiro"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors text-[#8B9BB0] hover:text-[#E2E8F0]" variant="imported" size="imported" onClick={(e) => { setHero('comercial'); }}>{"Comercial"}</Button><Button type="button" className="cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors bg-[#A3E635] text-[#090C10] font-semibold" variant="imported" size="imported" onClick={(e) => { setHero('operacoes'); }}>{"Operações"}</Button> </>)})[activeHero];
 const heroKpis = ({"financeiro":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Receita Líquida"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"R$ 2,84M"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +18,4%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Margem EBITDA"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"27,6%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +3,2 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Inadimplência"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"1,9%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ -0,8 pp"}</p></div> </>),"comercial":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Meta Atingida"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"114,2%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +14,2%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Ticket Médio"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"R$ 18,9k"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +9,6%"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Conversão"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"31,4%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +4,1 pp"}</p></div> </>),"operacoes":(<> <div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Entregas OTIF"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"96,8%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +5,4 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"OEE Médio"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"84,5%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ +6,1 pp"}</p></div><div className="rounded-xl border border-[#1A232F] bg-[#111720] px-3 py-2.5"><p className="text-[10px] font-medium uppercase tracking-wider text-[#7D8C9F]">{"Horas Manuais"}</p><p className="font-mono-data mt-1 text-base font-semibold text-[#F0F4F8]">{"-72%"}</p><p className="mt-0.5 text-[11px] font-medium text-[#A3E635]">{"↗ Automação"}</p></div> </>)})[activeHero];
@@ -12,13 +180,13 @@ const heroTrend = ({"financeiro":(<> <defs ><linearGradient id="hg" x1="0" y1="0
 const heroSubtitle = {"financeiro": "DRE Gerencial & Margem EBITDA", "comercial": "Funil de Vendas & Metas por Canal", "operacoes": "SLA Logístico, Frota & Eficiência"}[activeHero];
 const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": "Sincronizado com CRM • Tempo Real", "operacoes": "Pipeline Python + Power BI"}[activeHero];
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
-const solutions = (<> <article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article><article className="flex flex-col justify-between bg-[#0D1218] p-6 transition-colors hover:bg-[#111821]"><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article> </>);
+const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
-const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OTIF"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"96,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Custo/Km"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 3,42"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Entregas"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4.820"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "55%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "72%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "77%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "51%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "64%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "79%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "55%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "72%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "77%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "51%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "64%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "79%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,35.5 22.0,31.2 44.0,26.2 66.0,28.3 88.0,19.7 110.0,15.4 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,35.5 22.0,31.2 44.0,26.2 66.0,28.3 88.0,19.7 110.0,15.4"></polyline></svg></div>
 </div>
 </div>
@@ -29,14 +197,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Frota, entregas no prazo (OTIF), SLA e custo operacional por rota."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=7af30bbf-9e2a-4329-854b-b0880e4baabb&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={60} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Headcount"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"412"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Turnover"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"2,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Absenteísmo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "89%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "48%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "75%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "61%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "69%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "80%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "66%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "89%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "48%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "75%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "61%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "69%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "80%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "66%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,33.4 22.0,31.9 44.0,29.0 66.0,23.3 88.0,25.4 110.0,17.5 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,33.4 22.0,31.9 44.0,29.0 66.0,23.3 88.0,25.4 110.0,17.5"></polyline></svg></div>
 </div>
 </div>
@@ -47,14 +215,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Turnover, headcount, absenteísmo, folha salarial e retenção."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=03354214-1b1c-4ebe-aa2f-2583c2151eb4&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Saúde") && (<Reveal delay={120} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Ocupação"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"87,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Média Perm."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"4,1 d"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Triagem"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"94%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "51%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "71%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "84%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "93%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "76%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "51%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "71%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "84%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "93%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,30.5 22.0,25.4 44.0,24.0 66.0,19.7 88.0,21.1 110.0,14.6 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,30.5 22.0,25.4 44.0,24.0 66.0,19.7 88.0,21.1 110.0,14.6"></polyline></svg></div>
 </div>
 </div>
@@ -65,14 +233,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Ocupação de leitos, giro hospitalar, glosas e indicadores clínicos."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=f3c9dc29-80ac-46ba-a457-1038e4fec79e&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={180} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"OEE Global"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"84,6%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Refugo"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"1,3%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Disponib."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"92,1%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "64%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "79%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "53%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "92%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "73%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "86%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "64%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "79%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "53%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "92%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "73%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "86%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,34.1 22.0,29.8 44.0,24.7 66.0,22.6 88.0,17.5 110.0,16.1 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,34.1 22.0,29.8 44.0,24.7 66.0,22.6 88.0,17.5 110.0,16.1"></polyline></svg></div>
 </div>
 </div>
@@ -83,14 +251,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"OEE global, refugos, paradas de máquina e eficiência por turno."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=40849204-011c-49b7-9a58-7af3e7dc1501&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={240} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Faturamento"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 1,92M"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Meta"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"112%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"29,8%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "96%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "67%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "59%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "74%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "61%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "48%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "96%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "74%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "61%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "48%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,34.8 22.0,28.3 44.0,25.4 66.0,19.7 88.0,15.4 110.0,10.3 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,34.8 22.0,28.3 44.0,25.4 66.0,19.7 88.0,15.4 110.0,10.3"></polyline></svg></div>
 </div>
 </div>
@@ -101,14 +269,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Funil comercial, metas, ticket médio, curva ABC e vendedores."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=e3b8491b-9d8c-4de5-b39b-f0ba9855d0a6&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Comercial & Pessoas") && (<Reveal delay={300} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"TMA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"3m 42s"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Nível Serv."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"91,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Conversão"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"18,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "83%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "91%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "67%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "87%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "70%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "83%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "91%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "87%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,29.8 22.0,26.9 44.0,28.3 66.0,21.8 88.0,19.0 110.0,13.9 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,29.8 22.0,26.9 44.0,28.3 66.0,21.8 88.0,19.0 110.0,13.9"></polyline></svg></div>
 </div>
 </div>
@@ -119,14 +287,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"TMA, taxa de conversão, nível de serviço e produtividade."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=6db77ebf-cd48-4903-94fc-e87710b5e195&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={360} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Avanço Fís."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"68,5%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Desvio Orç."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"-1,4%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Medições"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 4,6M"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "93%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "84%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "77%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "68%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "59%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "50%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "89%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "93%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "84%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "77%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "68%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "50%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "89%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,36.2 22.0,31.9 44.0,26.9 66.0,21.8 88.0,19.0 110.0,16.8 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,36.2 22.0,31.9 44.0,26.9 66.0,21.8 88.0,19.0 110.0,16.8"></polyline></svg></div>
 </div>
 </div>
@@ -137,14 +305,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Cronograma físico-financeiro, previsto × realizado e desvios."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=aff9e01d-61ed-4064-99a9-9cc088eb8129&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={420} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"SLA Interno"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"95,2%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Backlog"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"34"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Eficiência"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"89%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "63%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "71%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "76%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "80%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "85%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "90%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "54%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "63%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "71%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "80%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "85%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "90%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,33.4 22.0,29.8 44.0,26.2 66.0,23.3 88.0,18.2 110.0,13.2 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,33.4 22.0,29.8 44.0,26.2 66.0,23.3 88.0,18.2 110.0,13.2"></polyline></svg></div>
 </div>
 </div>
@@ -155,14 +323,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"Indicadores de rotina, produtividade de equipes, SLAs e metas."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=573585de-6b23-4e8c-999c-e6d83f0c3915&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<article className="etp-card group flex flex-col overflow-hidden rounded-2xl text-left">
+</article></Reveal>)}{(activeCat === "Todos" || activeCat === "Gestão & Finanças") && (<Reveal delay={480} className="flex"><article className="etp-card group flex w-full flex-col overflow-hidden rounded-2xl text-left">
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
 <div className="grid grid-cols-3 gap-2"><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"EBITDA"}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"26,8%"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Caixa Proj."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"R$ 890k"}</p></div><div className="rounded-lg border border-[#17202B] bg-[#0F151C] px-2.5 py-2"><p className="truncate text-[9px] uppercase tracking-wider text-[#6E7E91]">{"Margem Líq."}</p><p className="font-mono-data mt-0.5 truncate text-xs font-semibold text-[#E2E8F0]">{"19,4%"}</p></div></div>
 <div className="mt-2.5 grid grid-cols-12 gap-2">
-<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "78%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "100%"}} className="w-full rounded-t-[2px] bg-[#A3E635]"></span><span style={{"height": "59%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "67%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "83%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "87%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span><span style={{"height": "76%"}} className="w-full rounded-t-[2px] bg-[#A3E635]/35"></span></div>
+<div className="col-span-7 flex h-16 items-end justify-between gap-1 rounded-lg border border-[#17202B] bg-[#0D1218] px-2.5 py-2"><span style={{"height": "70%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "78%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[25ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "100%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635] transition-all duration-300 delay-[50ms] ease-out group-hover:scale-y-105 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "59%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[75ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "67%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[100ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "83%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[125ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "87%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[150ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span><span style={{"height": "76%"}} className="w-full origin-bottom rounded-t-[2px] bg-[#A3E635]/35 transition-all duration-300 delay-[175ms] ease-out group-hover:scale-y-110 group-hover:brightness-125 group-hover:contrast-110"></span></div>
 <div className="col-span-5 flex h-16 items-end rounded-lg border border-[#17202B] bg-[#0D1218] px-2 py-1.5"><svg viewBox="0 0 110 44" className="h-11 w-full overflow-visible"><polygon points="0,44 0.0,32.6 22.0,27.6 44.0,24.7 66.0,20.4 88.0,17.5 110.0,11.8 110,44" fill="#A3E635" fillOpacity="0.18"></polygon><polyline fill="none" stroke="#A3E635" strokeWidth="1.8" strokeLinecap="round" points="0.0,32.6 22.0,27.6 44.0,24.7 66.0,20.4 88.0,17.5 110.0,11.8"></polyline></svg></div>
 </div>
 </div>
@@ -173,12 +341,14 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">{"DRE gerencial, fluxo de caixa projetado, margens e EBITDA."}</p>
 </div>
 <div className="mt-4 flex items-center border-t border-[#18212C] pt-3.5">
-<a href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI ↗"}</a>
+<a href="https://app.powerbi.com/reportEmbed?reportId=fe422572-a98f-401d-91d3-2f5feff3e8d9&autoAuth=true&ctid=f398df9c-fd0c-4829-a003-c770a1c4a063" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A3E635] transition-colors hover:text-[#BEF264] hover:underline">{"Abrir no Power BI "}<span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">{"↗"}</span></a>
 </div>
 </div>
-</article>)} </>);
+</article></Reveal>)} </>);
 const proposals = (<> 
-<article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319]">
+<Reveal delay={0} className="flex">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319] transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 01"}</span></div>
 <h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Dashboards em Power BI"}</h3>
@@ -187,7 +357,10 @@ const proposals = (<>
 </div>
 <Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors border border-[#2A3747] bg-[#131B24] text-[#F0F4F8] hover:border-[#A3E635]/60 hover:text-[#A3E635]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('projeto-pontual'); }}>{"Solicitar Orçamento →"}</Button>
 </article>
-<article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#A3E635]/55 bg-[#101715]">
+</Reveal>
+<Reveal delay={100} className="flex">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#A3E635]/55 bg-[#101715] transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 02"}</span><span className="rounded-full bg-[#A3E635] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#090C10]">{"Mais Escolhido"}</span></div>
 <h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Consultoria & BI Recorrente"}</h3>
@@ -196,7 +369,10 @@ const proposals = (<>
 </div>
 <Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors bg-[#A3E635] text-[#090C10] hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('consultoria-recorrente'); }}>{"Falar sobre Recorrência →"}</Button>
 </article>
-<article className="flex flex-col justify-between rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319]">
+</Reveal>
+<Reveal delay={200} className="flex">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319] transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 03"}</span></div>
 <h3 className="mt-3 text-xl font-semibold text-[#F0F4F8]">{"Automações & Soluções Web"}</h3>
@@ -205,10 +381,15 @@ const proposals = (<>
 </div>
 <Button type="button" className="mt-7 w-full cursor-pointer rounded-full px-5 py-3 text-xs font-semibold transition-colors border border-[#2A3747] bg-[#131B24] text-[#F0F4F8] hover:border-[#A3E635]/60 hover:text-[#A3E635]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('automacao-integracoes'); }}>{"Solicitar Automação →"}</Button>
 </article>
+</Reveal>
  </>);
 return (<>
 
-<header className="sticky top-0 z-40 border-b border-[#1A222C]/90 bg-[#090C10]/90 backdrop-blur-md">
+<div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-transparent">
+<div className="h-full w-full origin-left bg-[#A3E635] transition-transform duration-75 ease-out" style={{ transform: `scaleX(${scrollProgress / 100})` }} />
+</div>
+
+<header className={`sticky top-0 z-40 border-b transition-all duration-300 ${scrolled ? "border-[#1A222C]/90 bg-[#090C10]/85 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 <a href="#inicio" className="flex items-center gap-3">
 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F0F4F8] p-1"><img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-full w-full object-contain" /></span>
@@ -232,30 +413,37 @@ return (<>
 
 <section id="inicio" className="etp-hero-atmosphere border-b border-[#161E28]" style={{"background":"radial-gradient(62% 52% at 14% 12%, rgba(132, 204, 22, 0.055) 0%, rgba(77, 124, 15, 0.018) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 22%, rgba(163, 230, 53, 0.022) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)"}}>
 <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
+<Reveal>
 <div className="mx-auto max-w-4xl text-center">
 <p className="font-mono-data mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[#94A3B8]">{"\n              INTELIGÊNCIA DE DADOS, BI & AUTOMAÇÃO • TODOS OS SEGMENTOS\n            "}</p>
 <h1 className="font-editorial text-5xl leading-[1.05] text-[#F0F4F8] sm:text-6xl">{"\n              Inteligência de dados para "}<span className="italic text-[#A3E635]">{"decisões precisas"}</span>{" na sua empresa.\n            "}</h1>
 <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed text-[#94A3B8] sm:text-base">{"\n              A "}<strong className="font-semibold text-[#E2E8F0]">{"Elite Tech Pro"}</strong>{" estrutura dashboards executivos em Power BI, pipelines em SQL e Python e automações com n8n — entregando clareza de margem, caixa e operação para quem decide o rumo do negócio.\n            "}</p>
 </div>
+</Reveal>
 
+<Reveal delay={100}>
 <div className="mt-14 grid grid-cols-2 divide-y divide-[#1A232F] rounded-xl border border-[#1A232F] bg-[#0D1218]/90 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
 <div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ARQUITETURA"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"BI, Engenharia de Dados & IA"}</p></div>
 <div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ECOSSISTEMA"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Power BI • SQL • Python • n8n"}</p></div>
 <div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"INTEGRAÇÕES"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"ERPs, CRMs & Bancos de Dados"}</p></div>
 <div className="px-5 py-4"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#64748B]">{"ATUAÇÃO"}</p><p className="mt-1 text-sm font-semibold text-[#F0F4F8]">{"Projetos Sob Medida • Brasil"}</p></div>
 </div>
+</Reveal>
 
+<Reveal delay={180}>
 <div className="mt-12 grid grid-cols-2 gap-8 border-t border-[#161E28] pt-10 sm:grid-cols-4">
-<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl">{"+20"}</p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Dashboards em produção"}</p></div>
-<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl">{"+20"}</p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Clientes & operações atendidas"}</p></div>
-<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl">{"9+"}</p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Segmentos estruturados"}</p></div>
-<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl">{"3+"}</p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Anos em análise de dados"}</p></div>
+<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl"><AnimatedCounter target={20} prefix="+" /></p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Dashboards em produção"}</p></div>
+<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl"><AnimatedCounter target={20} prefix="+" /></p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Clientes & operações atendidas"}</p></div>
+<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl"><AnimatedCounter target={9} suffix="+" /></p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Segmentos estruturados"}</p></div>
+<div ><p className="font-editorial text-4xl leading-none text-[#A3E635] sm:text-5xl"><AnimatedCounter target={3} suffix="+" /></p><p className="mt-2 text-xs font-medium text-[#8B9BB0]">{"Anos em análise de dados"}</p></div>
 </div>
+</Reveal>
 </div>
 </section>
 
 <section id="solucoes" className="border-b border-[#161E28] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="grid gap-6 md:grid-cols-12 md:items-end">
 <div className="md:col-span-7">
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"01 / Soluções & Stack Tecnológica"}</p>
@@ -265,12 +453,14 @@ return (<>
 <p className="text-sm leading-relaxed text-[#94A3B8]">{"Combinamos engenharia de dados, visualização executiva e automação de processos para eliminar retrabalho manual e colocar indicadores confiáveis nas mãos da liderança."}</p>
 </div>
 </div>
+</Reveal>
 <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-[#1D2631] bg-[#1D2631] sm:grid-cols-2 lg:grid-cols-3" id="solutions-grid">{solutions}</div>
 </div>
 </section>
 
 <section id="dashboards" className="border-b border-[#161E28] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
 <div >
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"02 / Portfólio de Projetos Reais"}</p>
@@ -279,12 +469,14 @@ return (<>
 <p className="text-xs font-medium text-[#7D8C9F]">{"Abra o painel interativo no Power BI pelo link de cada card"}</p>
 </div>
 <div className="mt-8 flex flex-wrap gap-2" id="category-filters">{filterButtons}</div>
+</Reveal>
 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" id="dashboards-grid">{dashboardCards}</div>
 </div>
 </section>
 
 <section id="propostas" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="grid gap-6 md:grid-cols-12 md:items-end">
 <div className="md:col-span-7">
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"03 / Modelos de Proposta Comercial"}</p>
@@ -294,27 +486,31 @@ return (<>
 <p className="text-sm leading-relaxed text-[#94A3B8]">{"Analise qual modelo faz mais sentido para sua empresa hoje. Todos os projetos começam com um "}<strong className="text-[#E2E8F0]">{"diagnóstico gratuito"}</strong>{" e entregam proposta com escopo, prazo e investimento fechados."}</p>
 </div>
 </div>
+</Reveal>
 <div className="mt-12 grid gap-6 lg:grid-cols-3" id="proposals-grid">{proposals}</div>
 </div>
 </section>
 
 <section id="processo" className="border-b border-[#161E28] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="max-w-2xl">
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"04 / Metodologia de Entrega"}</p>
 <h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Do dado bruto à decisão estratégica em quatro etapas."}</h2>
 </div>
+</Reveal>
 <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-<div className="flex flex-col justify-between rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6"><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div>
-<div className="flex flex-col justify-between rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6"><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div>
-<div className="flex flex-col justify-between rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6"><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div>
-<div className="flex flex-col justify-between rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6"><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div>
+<Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 </div>
 </div>
 </section>
 
 <section id="sobre" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
 <div >
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"05 / Quem Lidera Cada Projeto • Para Donos de Empresa"}</p>
@@ -372,35 +568,42 @@ return (<>
 </div>
 </div>
 </div>
+</Reveal>
 </div>
 </section>
 
 <section id="contato" className="py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<Reveal>
 <div className="max-w-3xl">
 <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#7D8C9F]">{"06 / Diagnóstico & Contato Comercial"}</p>
 <h2 className="font-editorial mt-3 text-4xl leading-[1.06] text-[#F0F4F8] sm:text-5xl">{"\n            Vamos conversar sobre o próximo "}<span className="italic text-[#A3E635]">{"dashboard"}</span>{" da sua empresa.\n          "}</h2>
 <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{"Fale diretamente comigo pelos canais abaixo para discutirmos o projeto da sua empresa."}</p>
 </div>
 <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
-<a href="https://wa.me/qr/Y7DYW352XXXZE1?s=v" target="_blank" rel="noopener noreferrer" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
+<a onMouseMove={handleSpotlightMove} href="https://wa.me/qr/Y7DYW352XXXZE1?s=v" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <span aria-hidden style={{"borderColor":"rgba(163,230,53,0.45)"}} className="pointer-events-none absolute -inset-px rounded-2xl border opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"WHATSAPP DIRETO"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"(11) 96839-4636"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
-<a href="mailto:elitetechpro10@gmail.com" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
+<a onMouseMove={handleSpotlightMove} href="mailto:elitetechpro10@gmail.com" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"E-MAIL COMERCIAL"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"elitetechpro10@gmail.com"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
-<a href="https://www.linkedin.com/in/gustavo-pereira-587017154/" target="_blank" rel="noopener noreferrer" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
+<a onMouseMove={handleSpotlightMove} href="https://www.linkedin.com/in/gustavo-pereira-587017154/" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"LINKEDIN"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"linkedin.com/in/gustavo-pereira-587017154"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
-<a href="https://etpportfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
+<a onMouseMove={handleSpotlightMove} href="https://etpportfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
+<SpotlightOverlay />
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"PORTFÓLIO"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"etpportfolio.vercel.app"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
 </div>
+</Reveal>
 </div>
 </section>
 </main>
