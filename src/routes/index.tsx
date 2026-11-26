@@ -227,6 +227,236 @@ function SpotlightOverlay() {
   );
 }
 
+function AuroraBackground() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+    >
+      <div className="etp-aurora-lime absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full bg-[#A3E635]/[0.14] blur-[130px] sm:h-[640px] sm:w-[640px]" />
+      <div className="etp-aurora-cyan absolute -bottom-28 -right-28 h-[440px] w-[440px] rounded-full bg-[#0EA5E9]/[0.15] blur-[130px] sm:h-[620px] sm:w-[620px]" />
+    </div>
+  );
+}
+
+function SectionDivider({ delay = 0 }: { delay?: number }) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none relative h-px w-full overflow-hidden bg-white/[0.07]"
+    >
+      <div
+        className="etp-data-beam absolute inset-y-0 left-0 w-44 sm:w-64"
+        style={delay ? { animationDelay: `${delay}s` } : undefined}
+      />
+    </div>
+  );
+}
+
+function HeroDataNetwork() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const isFinePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(pointer: fine)").matches;
+
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let rafId = 0;
+    const mouse = { x: -9999, y: -9999, active: false };
+
+    type Node = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      r: number;
+      cyan: boolean;
+    };
+
+    let nodes: Node[] = [];
+
+    const initNodes = () => {
+      const count = width < 640 ? 22 : 35;
+      nodes = Array.from({ length: count }, (_, i) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: 1.4 + Math.random() * 1.3,
+        cyan: i % 3 === 0,
+      }));
+    };
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const rect = parent.getBoundingClientRect();
+      width = Math.max(1, Math.floor(rect.width));
+      height = Math.max(1, Math.floor(rect.height));
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (nodes.length === 0) initNodes();
+    };
+
+    const onMouseMove = (e: globalThis.MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+        mouse.x = x;
+        mouse.y = y;
+        mouse.active = true;
+      } else {
+        mouse.active = false;
+      }
+    };
+
+    const onMouseLeave = () => {
+      mouse.active = false;
+    };
+
+    const drawFrame = () => {
+      ctx.clearRect(0, 0, width, height);
+      const maxDist = width < 640 ? 110 : 140;
+      const mouseDist = 165;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i]!;
+        if (!reducedMotion) {
+          if (mouse.active) {
+            const dx = mouse.x - n.x;
+            const dy = mouse.y - n.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq > 16 && distSq < mouseDist * mouseDist) {
+              const dist = Math.sqrt(distSq);
+              const pull = (1 - dist / mouseDist) * 0.015;
+              n.vx += (dx / dist) * pull;
+              n.vy += (dy / dist) * pull;
+            }
+          }
+          // Gentle damping to keep motion calm and steady
+          n.vx *= 0.992;
+          n.vy *= 0.992;
+          const speed = Math.hypot(n.vx, n.vy);
+          if (speed < 0.14) {
+            n.vx += (Math.random() - 0.5) * 0.04;
+            n.vy += (Math.random() - 0.5) * 0.04;
+          } else if (speed > 0.65) {
+            n.vx = (n.vx / speed) * 0.65;
+            n.vy = (n.vy / speed) * 0.65;
+          }
+          n.x += n.vx;
+          n.y += n.vy;
+
+          if (n.x < 0) {
+            n.x = 0;
+            n.vx = Math.abs(n.vx);
+          } else if (n.x > width) {
+            n.x = width;
+            n.vx = -Math.abs(n.vx);
+          }
+          if (n.y < 0) {
+            n.y = 0;
+            n.vy = Math.abs(n.vy);
+          } else if (n.y > height) {
+            n.y = height;
+            n.vy = -Math.abs(n.vy);
+          }
+        }
+
+        // Connect to nearby nodes
+        for (let j = i + 1; j < nodes.length; j++) {
+          const m = nodes[j]!;
+          const dx = n.x - m.x;
+          const dy = n.y - m.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < maxDist) {
+            const alpha = (1 - dist / maxDist) * 0.18;
+            ctx.strokeStyle =
+              n.cyan && m.cyan
+                ? `rgba(14, 165, 233, ${alpha.toFixed(3)})`
+                : `rgba(163, 230, 53, ${alpha.toFixed(3)})`;
+            ctx.lineWidth = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(m.x, m.y);
+            ctx.stroke();
+          }
+        }
+
+        // Connect to cursor on desktop
+        if (mouse.active) {
+          const dx = n.x - mouse.x;
+          const dy = n.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < mouseDist) {
+            const alpha = (1 - dist / mouseDist) * 0.28;
+            ctx.strokeStyle = n.cyan
+              ? `rgba(14, 165, 233, ${alpha.toFixed(3)})`
+              : `rgba(163, 230, 53, ${alpha.toFixed(3)})`;
+            ctx.lineWidth = 0.9;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+        }
+
+        // Draw node dot
+        ctx.fillStyle = n.cyan
+          ? "rgba(14, 165, 233, 0.45)"
+          : "rgba(163, 230, 53, 0.45)";
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (!reducedMotion) {
+        rafId = requestAnimationFrame(drawFrame);
+      }
+    };
+
+    resize();
+    drawFrame();
+
+    window.addEventListener("resize", resize, { passive: true });
+    if (isFinePointer && !reducedMotion) {
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+      window.addEventListener("mouseleave", onMouseLeave, { passive: true });
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+      if (isFinePointer && !reducedMotion) {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseleave", onMouseLeave);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+    />
+  );
+}
+
 function BeforeAfterComparator() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState(50);
@@ -490,7 +720,7 @@ function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
   return (
     <div
       onMouseMove={handleSpotlightMove}
-      className="group/spot relative mt-12 overflow-hidden rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6 transition-all duration-300 hover:border-[#2A3747] sm:p-8 lg:p-10"
+      className="group/spot relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8 lg:p-10"
     >
       <SpotlightOverlay />
       <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
@@ -638,10 +868,10 @@ function FaqAccordion() {
           <div
             key={item.q}
             onMouseMove={handleSpotlightMove}
-            className={`group/spot relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+            className={`group/spot relative overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300 ${
               isOpen
-                ? "border-[#A3E635]/45 bg-[#101715]"
-                : "border-[#1C2530] bg-[#0D1218] hover:border-[#2A3747]"
+                ? "border-[#A3E635]/45 bg-[#0F1914]/75"
+                : "border-white/10 bg-[#0B0F14]/70 hover:border-white/20"
             }`}
           >
             <SpotlightOverlay />
@@ -762,7 +992,7 @@ function ScopeSimulator() {
   return (
     <div
       onMouseMove={handleSpotlightMove}
-      className="group/spot relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-[#1E2733] bg-[#0E1319] p-6 transition-all duration-300 hover:border-[#2A3747] sm:p-8"
+      className="group/spot relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#A3E635]/30 sm:p-8"
     >
       <SpotlightOverlay />
       <div className="relative z-10">
@@ -1002,7 +1232,7 @@ const heroTrend = ({"financeiro":(<> <defs ><linearGradient id="hg" x1="0" y1="0
 const heroSubtitle = {"financeiro": "DRE Gerencial & Margem EBITDA", "comercial": "Funil de Vendas & Metas por Canal", "operacoes": "SLA Logístico, Frota & Eficiência"}[activeHero];
 const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": "Sincronizado com CRM • Tempo Real", "operacoes": "Pipeline Python + Power BI"}[activeHero];
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
-const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-[#18212C] pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
+const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
 const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
@@ -1169,7 +1399,7 @@ const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações
 </DashboardCard></Reveal>)} </>);
 const proposals = (<> 
 <Reveal delay={0} className="flex">
-<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319] transition-all duration-300 hover:-translate-y-1">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
 <SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 01"}</span></div>
@@ -1181,7 +1411,7 @@ const proposals = (<>
 </article>
 </Reveal>
 <Reveal delay={100} className="flex">
-<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#A3E635]/55 bg-[#101715] transition-all duration-300 hover:-translate-y-1">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#A3E635]/55 bg-[#0F1914]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
 <SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 02"}</span><span className="rounded-full bg-[#A3E635] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#090C10]">{"Mais Escolhido"}</span></div>
@@ -1193,7 +1423,7 @@ const proposals = (<>
 </article>
 </Reveal>
 <Reveal delay={200} className="flex">
-<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7 border-[#1E2733] bg-[#0E1319] transition-all duration-300 hover:-translate-y-1">
+<article onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:p-7">
 <SpotlightOverlay />
 <div >
 <div className="flex items-center justify-between"><span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-[#8B9BB0]">{"PROPOSTA 03"}</span></div>
@@ -1207,11 +1437,13 @@ const proposals = (<>
  </>);
 return (<>
 
+<AuroraBackground />
+
 <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-transparent">
 <div className="h-full w-full origin-left bg-[#A3E635] transition-transform duration-75 ease-out" style={{ transform: `scaleX(${scrollProgress / 100})` }} />
 </div>
 
-<header className={`sticky top-0 z-40 border-b transition-all duration-300 ${scrolled ? "border-[#1A222C]/90 bg-[#090C10]/85 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
+<header className={`sticky top-0 z-40 border-b transition-all duration-300 ${scrolled ? "border-white/10 bg-[#090C10]/80 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 <a href="#inicio" className="flex items-center gap-3">
 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F0F4F8] p-1"><img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-full w-full object-contain" /></span>
@@ -1245,16 +1477,16 @@ return (<>
 <Button type="button" className="etp-cta-shimmer inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#A3E635] px-4 py-2 text-xs font-semibold text-[#090C10] transition-colors hover:bg-[#BEF264]" variant="imported" size="imported" onClick={(e) => { selectProposalAndScroll('diagnostico-gratuito'); }}>{"\n        Diagnóstico Gratuito ↗\n      "}</Button>
 </div>
 </header>
-<main >
+<main className="relative z-10">
 
-<section id="inicio" className="relative overflow-hidden border-b border-[#161E28] bg-[#090C10]">
+<section id="inicio" className="relative overflow-hidden bg-transparent">
 <div
   ref={heroGlowRef}
   aria-hidden
   className="pointer-events-none absolute -inset-x-0 -top-16 -bottom-16 will-change-transform"
   style={{
     background:
-      "radial-gradient(62% 52% at 14% 16%, rgba(132, 204, 22, 0.085) 0%, rgba(77, 124, 15, 0.025) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(45% 40% at 88% 24%, rgba(163, 230, 53, 0.035) 0%, rgba(9, 12, 16, 0) 70%), linear-gradient(180deg, var(--background) 0%, var(--site-0b0f14) 100%)",
+      "radial-gradient(62% 52% at 14% 16%, rgba(132, 204, 22, 0.09) 0%, rgba(77, 124, 15, 0.025) 42%, rgba(9, 12, 16, 0) 76%), radial-gradient(48% 42% at 88% 24%, rgba(14, 165, 233, 0.075) 0%, rgba(9, 12, 16, 0) 70%)",
   }}
 />
 <div
@@ -1262,6 +1494,7 @@ return (<>
   aria-hidden
   className="etp-dot-grid pointer-events-none absolute -inset-x-0 -top-16 -bottom-16 will-change-transform"
 />
+<HeroDataNetwork />
 <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
 <Reveal>
 <div className="mx-auto max-w-4xl text-center">
@@ -1290,8 +1523,9 @@ return (<>
 </Reveal>
 </div>
 </section>
+<SectionDivider delay={0} />
 
-<section id="solucoes" className="border-b border-[#161E28] py-20 md:py-24">
+<section id="solucoes" className="py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="grid gap-6 md:grid-cols-12 md:items-end">
@@ -1304,11 +1538,12 @@ return (<>
 </div>
 </div>
 </Reveal>
-<div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-[#1D2631] bg-[#1D2631] sm:grid-cols-2 lg:grid-cols-3" id="solutions-grid">{solutions}</div>
+<div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3" id="solutions-grid">{solutions}</div>
 </div>
 </section>
+<SectionDivider delay={1.4} />
 
-<section id="dashboards" className="border-b border-[#161E28] py-20 md:py-24">
+<section id="dashboards" className="py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -1323,8 +1558,9 @@ return (<>
 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" id="dashboards-grid">{dashboardCards}</div>
 </div>
 </section>
+<SectionDivider delay={2.8} />
 
-<section id="antes-depois" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
+<section id="antes-depois" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-3xl">
@@ -1338,8 +1574,9 @@ return (<>
 </Reveal>
 </div>
 </section>
+<SectionDivider delay={4.1} />
 
-<section id="calculadora-roi" className="border-b border-[#161E28] py-20 md:py-24">
+<section id="calculadora-roi" className="py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-3xl">
@@ -1352,8 +1589,9 @@ return (<>
 </Reveal>
 </div>
 </section>
+<SectionDivider delay={1.1} />
 
-<section id="propostas" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
+<section id="propostas" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="grid gap-6 md:grid-cols-12 md:items-end">
@@ -1369,8 +1607,9 @@ return (<>
 <div className="mt-12 grid gap-6 lg:grid-cols-3" id="proposals-grid">{proposals}</div>
 </div>
 </section>
+<SectionDivider delay={2.4} />
 
-<section id="processo" className="border-b border-[#161E28] py-20 md:py-24">
+<section id="processo" className="py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-2xl">
@@ -1379,20 +1618,21 @@ return (<>
 </div>
 </Reveal>
 <div ref={methodRef} className="relative mt-12">
-<div aria-hidden className="pointer-events-none absolute left-[12%] right-[12%] top-11 z-0 hidden h-[2px] overflow-hidden rounded-full bg-[#1C2530] lg:block">
-<div className={`h-full w-full origin-left bg-gradient-to-r from-[#A3E635]/40 via-[#A3E635] to-[#A3E635] transition-transform duration-1000 ease-out ${methodLineVisible ? "scale-x-100" : "scale-x-0"}`} />
+<div aria-hidden className="pointer-events-none absolute left-[12%] right-[12%] top-11 z-0 hidden h-[2px] overflow-hidden rounded-full bg-white/10 lg:block">
+<div className={`h-full w-full origin-left bg-gradient-to-r from-[#0EA5E9]/70 via-[#A3E635] to-[#A3E635] transition-transform duration-1000 ease-out ${methodLineVisible ? "scale-x-100" : "scale-x-0"}`} />
 </div>
 <div className="relative z-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-<Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
-<Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#1C2530] bg-[#0D1218] p-6 transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={0} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"01"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Diagnóstico & Mapeamento"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Entendemos a rotina da operação, definimos os indicadores essenciais e mapeamos as fontes de dados (ERP, SQL, CRM ou planilhas)."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={90} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"02"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Arquitetura & Protótipo"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Estruturamos a modelagem de dados e apresentamos o layout no Figma para aprovação antes do desenvolvimento — zero surpresas."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={180} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"03"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Desenvolvimento & Automação"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Construímos os painéis em Power BI com métricas DAX validadas e rotinas automáticas em SQL, Python, n8n ou Power Automate."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
+<Reveal delay={270} className="flex"><div onMouseMove={handleSpotlightMove} className="group/spot relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/70 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><span className="font-editorial text-3xl text-[#A3E635]">{"04"}</span></div><h3 className="mt-4 text-base font-semibold text-[#F0F4F8]">{"Validação & Entrega"}</h3><p className="mt-2.5 text-xs leading-relaxed text-[#94A3B8]">{"Validamos os números junto à sua equipe, publicamos em nuvem e fazemos o treinamento prático para o uso no dia a dia."}</p></div><div className="mt-6 h-0.5 w-10 rounded-full bg-[#A3E635]/40"></div></div></Reveal>
 </div>
 </div>
 </div>
 </section>
+<SectionDivider delay={3.7} />
 
-<section id="sobre" className="border-b border-[#161E28] bg-[#0B0F14] py-20 md:py-24">
+<section id="sobre" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
@@ -1455,8 +1695,9 @@ return (<>
 </Reveal>
 </div>
 </section>
+<SectionDivider delay={0.8} />
 
-<section id="faq" className="border-b border-[#161E28] py-20 md:py-24">
+<section id="faq" className="py-20 md:py-24">
 <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-2xl">
@@ -1469,8 +1710,9 @@ return (<>
 </Reveal>
 </div>
 </section>
+<SectionDivider delay={2.1} />
 
-<section id="contato" className="bg-[#0B0F14] py-20 md:py-24">
+<section id="contato" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 <Reveal>
 <div className="max-w-3xl">
@@ -1506,7 +1748,8 @@ return (<>
 </div>
 </section>
 </main>
-<footer className="border-t border-[#161E28] bg-[#080B0F] py-8">
+<SectionDivider delay={3.2} />
+<footer className="relative z-10 bg-[#080B0F]/80 py-8 backdrop-blur-md">
 <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-[#6E7E91] sm:flex-row sm:px-6 lg:px-8">
 <div className="flex items-center gap-2.5">
 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#F0F4F8] p-0.5"><img src="https://i.ibb.co/mVhKs04M/Design-sem-nome-1.png" alt="Elite Tech Pro" className="h-full w-full object-contain" /></span>
