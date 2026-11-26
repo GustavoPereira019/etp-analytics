@@ -388,7 +388,7 @@ return (<>
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"WHATSAPP DIRETO"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"(11) 96839-4636"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
-<a href="mailto:elitetechpro10@gmail.com" target="_blank" rel="noopener noreferrer" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
+<a href="mailto:elitetechpro10@gmail.com" className="etp-card group relative flex items-center justify-between gap-3 rounded-2xl p-5">
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"E-MAIL COMERCIAL"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"elitetechpro10@gmail.com"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
