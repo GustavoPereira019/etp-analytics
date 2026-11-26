@@ -1969,9 +1969,9 @@ return (<>
 <div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"LINKEDIN"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"linkedin.com/in/gustavo-pereira-587017154"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
-<a onMouseMove={handleSpotlightMove} href="https://etpportfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
+<a onMouseMove={handleSpotlightMove} href="https://www.instagram.com/elite_tech_pro/" target="_blank" rel="noopener noreferrer" className="etp-card group group/spot relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
 <SpotlightOverlay />
-<div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"PORTFÓLIO"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"etpportfolio.vercel.app"}</p></div>
+<div className="min-w-0"><p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#6E7E91]">{"INSTAGRAM OFICIAL"}</p><p className="mt-0.5 truncate text-sm font-medium text-[#F0F4F8]">{"@elite_tech_pro"}</p></div>
 <span className="shrink-0 text-xs font-semibold text-[#A3E635]">{"↗"}</span>
 </a>
 </div>
@@ -1987,7 +1987,10 @@ return (<>
 <span className="font-medium text-[#CBD5E1]">{"Elite Tech Pro • Gustavo Pereira"}</span>
 <span >{"• © 2026"}</span>
 </div>
+<div className="flex items-center gap-5">
+<a href="https://www.instagram.com/elite_tech_pro/" target="_blank" rel="noopener noreferrer" className="text-[#94A3B8] transition-colors hover:text-[#A3E635]">{"@elite_tech_pro ↗"}</a>
 <a href="#inicio" className="text-[#A3E635] hover:text-[#BEF264]">{"Voltar ao topo ↑"}</a>
+</div>
 </div>
 </footer>
 <a
