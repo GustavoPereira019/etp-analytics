@@ -1075,34 +1075,76 @@ function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
   );
 }
 
-const STACK_CATEGORIES = ["Todas", "BI & Dados", "Banco & Web", "IA, Design & Automação"] as const;
-type StackCategory = (typeof STACK_CATEGORIES)[number];
+const SOLUTION_CATEGORIES = ["Todas", "BI & Planilhas", "Dados & Web", "IA, Design & Automação"] as const;
+type SolutionCategory = (typeof SOLUTION_CATEGORIES)[number];
 
-const STACK_TOOLS: readonly { name: string; tag: string; desc: string; category: Exclude<StackCategory, "Todas"> }[] = [
-  { name: "Power BI", tag: "BI & Visualização", desc: "Dashboards interativos, modelagem de dados e métricas DAX para acompanhamento gerencial.", category: "BI & Dados" },
-  { name: "PostgreSQL", tag: "Banco de Dados", desc: "Estruturação de tabelas, consultas SQL e armazenamento confiável para dados operacionais.", category: "Banco & Web" },
-  { name: "Supabase", tag: "Backend & Dados", desc: "Banco em nuvem, autenticação e estrutura de dados ágil para aplicações web e painéis.", category: "Banco & Web" },
-  { name: "Vercel", tag: "Hospedagem Web", desc: "Publicação rápida e estável de sites institucionais, landing pages e interfaces web.", category: "Banco & Web" },
-  { name: "Figma", tag: "Design & Templates", desc: "Criação de layouts e protótipos visuais antes da implementação final.", category: "IA, Design & Automação" },
-  { name: "Gemini", tag: "Inteligência Artificial", desc: "Apoio na estruturação de lógica, análises, rascunhos técnicos e produtividade.", category: "IA, Design & Automação" },
-  { name: "n8n & Python", tag: "Automação & ETL", desc: "Fluxos automáticos, integração entre sistemas e tratamento de dados recorrentes.", category: "IA, Design & Automação" },
-  { name: "Ferramentas Google", tag: "Planilhas & Workspace", desc: "Integração com Google Sheets, Drive e rotinas colaborativas do dia a dia da equipe.", category: "BI & Dados" },
+const SOLUTION_CARDS: readonly {
+  num: string;
+  tag: string;
+  title: string;
+  desc: string;
+  benefit: string;
+  category: Exclude<SolutionCategory, "Todas">;
+}[] = [
+  {
+    num: "01",
+    tag: "BI & Visualização",
+    title: "Power BI & Dashboards",
+    desc: "Painéis executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem.",
+    benefit: "Decisões rápidas em qualquer dispositivo",
+    category: "BI & Planilhas",
+  },
+  {
+    num: "02",
+    tag: "Planilhas & Modernização",
+    title: "Excel Corporativo & Google Sheets",
+    desc: "Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para bancos e BI.",
+    benefit: "Fim das planilhas quebradas e duplicadas",
+    category: "BI & Planilhas",
+  },
+  {
+    num: "03",
+    tag: "Engenharia & Banco",
+    title: "SQL, PostgreSQL & Supabase",
+    desc: "Integração direta com ERPs, estruturação de bancos relacionais em nuvem, autenticação e views prontas para escalar.",
+    benefit: "Fonte única da verdade sem divergências",
+    category: "Dados & Web",
+  },
+  {
+    num: "04",
+    tag: "Eficiência Operacional",
+    title: "Automação com n8n & Python",
+    desc: "Fluxos automatizados entre CRM, ERP, APIs, WhatsApp e rotinas de tratamento/ETL de grandes volumes de dados.",
+    benefit: "Menos trabalho manual e alertas em tempo real",
+    category: "IA, Design & Automação",
+  },
+  {
+    num: "05",
+    tag: "Design & Inteligência",
+    title: "UI/UX no Figma & IA (Gemini)",
+    desc: "Prototipação visual orientada à hierarquia de leitura e uso estratégico de IA para acelerar análises e regras de negócio.",
+    benefit: "Identidade visual da sua marca aplicada ao BI",
+    category: "IA, Design & Automação",
+  },
+  {
+    num: "06",
+    tag: "Presença Digital",
+    title: "Portais Web & Deploy na Vercel",
+    desc: "Desenvolvimento e hospedagem rápida de landing pages, portfólios e interfaces web leves conectadas à sua operação.",
+    benefit: "Performance, estabilidade e entrega ágil",
+    category: "Dados & Web",
+  },
 ];
 
-function StackTools() {
-  const [category, setCategory] = useState<StackCategory>("Todas");
-  const visible = STACK_TOOLS.filter((t) => category === "Todas" || t.category === category);
+function SolutionsGrid() {
+  const [category, setCategory] = useState<SolutionCategory>("Todas");
+  const visible = SOLUTION_CARDS.filter((c) => category === "Todas" || c.category === category);
 
   return (
     <>
       <Reveal>
-        <div className="max-w-3xl">
-          <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"ECOSSISTEMA & FERRAMENTAS"}</p>
-          <h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Ferramentas certas para cada etapa do projeto."}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{"Combinamos visualização, banco de dados, automação, IA e hospedagem moderna para entregar soluções rápidas e escaláveis."}</p>
-        </div>
-        <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar ferramentas por categoria">
-          {STACK_CATEGORIES.map((cat) => {
+        <div className="mt-10 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar soluções por categoria">
+          {SOLUTION_CATEGORIES.map((cat) => {
             const active = cat === category;
             return (
               <button
@@ -1123,21 +1165,33 @@ function StackTools() {
           })}
         </div>
       </Reveal>
-      <div key={category} className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map((tool, idx) => (
+      <div
+        key={category}
+        id="solutions-grid"
+        className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {visible.map((card, idx) => (
           <article
-            key={tool.name}
+            key={card.num}
             onMouseMove={handleSpotlightMove}
-            style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "backwards" }}
-            className="group/spot relative flex animate-in fade-in zoom-in-95 slide-in-from-bottom-2 flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md duration-500 transition-colors hover:-translate-y-1 hover:border-[#A3E635]/30"
+            style={{ animationDelay: `${idx * 60}ms`, animationFillMode: "backwards" }}
+            className="group/spot relative flex animate-in fade-in zoom-in-95 slide-in-from-bottom-2 flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-colors duration-500 hover:-translate-y-1 hover:border-[#A3E635]/30"
           >
             <SpotlightOverlay />
             <div className="relative z-10">
-              <span className="font-mono-data inline-block rounded border border-[#233322] bg-[#111B13] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[#A3E635]">
-                {tool.tag}
-              </span>
-              <h3 className="mt-4 text-lg font-semibold text-[#F0F4F8]">{tool.name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{tool.desc}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">
+                  {card.num}
+                </div>
+                <span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">
+                  {card.tag}
+                </span>
+              </div>
+              <h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{card.title}</h3>
+              <p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{card.desc}</p>
+            </div>
+            <div className="relative z-10 mt-6 border-t border-white/10 pt-4">
+              <p className="text-xs font-medium text-[#CBD5E1]">{card.benefit}</p>
             </div>
           </article>
         ))}
@@ -1145,6 +1199,7 @@ function StackTools() {
     </>
   );
 }
+
 
 const FAQ_ITEMS = [
   {
@@ -1529,7 +1584,6 @@ const heroTrend = ({"financeiro":(<> <defs ><linearGradient id="hg" x1="0" y1="0
 const heroSubtitle = {"financeiro": "DRE Gerencial & Margem EBITDA", "comercial": "Funil de Vendas & Metas por Canal", "operacoes": "SLA Logístico, Frota & Eficiência"}[activeHero];
 const heroUpdated = {"financeiro": "Atualizado via SQL • 08:00", "comercial": "Sincronizado com CRM • Tempo Real", "operacoes": "Pipeline Python + Power BI"}[activeHero];
 const heroInsight = {"financeiro": "Fechamento gerencial automatizado reduziu em 14h/mês a consolidação de planilhas.", "comercial": "Alertas diários no WhatsApp via n8n aumentaram a cadência de follow-up da equipe.", "operacoes": "Monitoramento por rota identificou gargalos de descarga com economia mensal de 11%."}[activeHero];
-const solutions = (<> <Reveal delay={0} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"01"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Business Intelligence"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Power BI Enterprise"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Dashboards executivos e operacionais com modelagem Star Schema, DAX avançado e atualização automática em nuvem."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Painéis prontos para diretoria, TVs e mobile"}</p></div></article></Reveal><Reveal delay={70} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"02"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Integração & Base Única"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"SQL & Engenharia de Dados"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Conexão direta com ERPs, bancos relacionais e planilhas corporativas. Views otimizadas prontas para escalar seu BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fonte única da verdade sem divergências"}</p></div></article></Reveal><Reveal delay={140} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"03"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"ETL & Inteligência"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Python & Analytics"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Rotinas automatizadas de extração, tratamento de grandes volumes e consolidação de múltiplos arquivos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Processamento rápido e auditável"}</p></div></article></Reveal><Reveal delay={210} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"04"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Eficiência Operacional"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"n8n & Automação de Fluxos"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Orquestração de integrações entre CRM, ERP, APIs, e-mail e WhatsApp eliminando tarefas manuais repetitivas."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Menos retrabalho e alertas em tempo real"}</p></div></article></Reveal><Reveal delay={280} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"05"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Modernização"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"Excel Corporativo & Migração"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Reestruturação de planilhas críticas, padronização de controles financeiros e migração segura para BI."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Fim das planilhas quebradas e duplicadas"}</p></div></article></Reveal><Reveal delay={350} className="flex h-full"><article onMouseMove={handleSpotlightMove} className="group/spot relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#0B0F14]/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-[#111821]/80"><SpotlightOverlay /><div ><div className="flex items-center justify-between"><div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#223026] bg-[#131C16] font-mono-data text-xs font-bold text-[#A3E635]">{"06"}</div><span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#A3E635]/90">{"Design Executivo"}</span></div><h3 className="mt-5 text-lg font-semibold text-[#F0F4F8]">{"UI/UX de Dados no Figma"}</h3><p className="mt-2.5 text-sm leading-relaxed text-[#94A3B8]">{"Prototipação visual orientada à hierarquia de leitura. Dashboards que qualquer gestor entende em segundos."}</p></div><div className="mt-6 border-t border-white/10 pt-4"><p className="text-xs font-medium text-[#CBD5E1]">{"Identidade visual da sua marca aplicada ao BI"}</p></div></article></Reveal> </>);
 const filterButtons = (<> <Button type="button" className={activeCat === "Todos" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Todos'); }}>{"Todos"}</Button><Button type="button" className={activeCat === "Gestão & Finanças" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Gestão & Finanças'); }}>{"Gestão & Finanças"}</Button><Button type="button" className={activeCat === "Operações & Indústria" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Operações & Indústria'); }}>{"Operações & Indústria"}</Button><Button type="button" className={activeCat === "Comercial & Pessoas" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Comercial & Pessoas'); }}>{"Comercial & Pessoas"}</Button><Button type="button" className={activeCat === "Saúde" ? "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#A3E635] bg-[#A3E635] text-[#090C10] font-semibold" : "cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors border-[#1E2733] bg-[#0D1218] text-[#94A3B8] hover:border-[#304054] hover:text-white"} variant="imported" size="imported" onClick={(e) => { setCat('Saúde'); }}>{"Saúde"}</Button> </>);
 const dashboardCards = (<> {(activeCat === "Todos" || activeCat === "Operações & Indústria") && (<Reveal delay={0} className="flex"><DashboardCard>
 <div className="border-b border-[#19222D] bg-[#0A0E13] p-4">
@@ -1826,7 +1880,7 @@ return (<>
 </div>
 </div>
 </Reveal>
-<div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3" id="solutions-grid">{solutions}</div>
+<SolutionsGrid />
 </div>
 </section>
 <SectionDivider delay={1.4} />
@@ -1920,12 +1974,6 @@ return (<>
 </section>
 <SectionDivider delay={3.7} />
 
-<section id="stack" className="py-20 md:py-24">
-<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-<StackTools />
-</div>
-</section>
-<SectionDivider delay={0.6} />
 
 <section id="sobre" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
