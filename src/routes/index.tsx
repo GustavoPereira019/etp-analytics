@@ -1075,6 +1075,77 @@ function RoiCalculator({ onCtaClick }: { onCtaClick: () => void }) {
   );
 }
 
+const STACK_CATEGORIES = ["Todas", "BI & Dados", "Banco & Web", "IA, Design & Automação"] as const;
+type StackCategory = (typeof STACK_CATEGORIES)[number];
+
+const STACK_TOOLS: readonly { name: string; tag: string; desc: string; category: Exclude<StackCategory, "Todas"> }[] = [
+  { name: "Power BI", tag: "BI & Visualização", desc: "Dashboards interativos, modelagem de dados e métricas DAX para acompanhamento gerencial.", category: "BI & Dados" },
+  { name: "PostgreSQL", tag: "Banco de Dados", desc: "Estruturação de tabelas, consultas SQL e armazenamento confiável para dados operacionais.", category: "Banco & Web" },
+  { name: "Supabase", tag: "Backend & Dados", desc: "Banco em nuvem, autenticação e estrutura de dados ágil para aplicações web e painéis.", category: "Banco & Web" },
+  { name: "Vercel", tag: "Hospedagem Web", desc: "Publicação rápida e estável de sites institucionais, landing pages e interfaces web.", category: "Banco & Web" },
+  { name: "Figma", tag: "Design & Templates", desc: "Criação de layouts e protótipos visuais antes da implementação final.", category: "IA, Design & Automação" },
+  { name: "Gemini", tag: "Inteligência Artificial", desc: "Apoio na estruturação de lógica, análises, rascunhos técnicos e produtividade.", category: "IA, Design & Automação" },
+  { name: "n8n & Python", tag: "Automação & ETL", desc: "Fluxos automáticos, integração entre sistemas e tratamento de dados recorrentes.", category: "IA, Design & Automação" },
+  { name: "Ferramentas Google", tag: "Planilhas & Workspace", desc: "Integração com Google Sheets, Drive e rotinas colaborativas do dia a dia da equipe.", category: "BI & Dados" },
+];
+
+function StackTools() {
+  const [category, setCategory] = useState<StackCategory>("Todas");
+  const visible = STACK_TOOLS.filter((t) => category === "Todas" || t.category === category);
+
+  return (
+    <>
+      <Reveal>
+        <div className="max-w-3xl">
+          <p className="font-mono-data text-[11px] uppercase tracking-[0.2em] text-[#A3E635]">{"ECOSSISTEMA & FERRAMENTAS"}</p>
+          <h2 className="font-editorial mt-3 text-4xl leading-[1.08] text-[#F0F4F8] sm:text-5xl">{"Ferramentas certas para cada etapa do projeto."}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{"Combinamos visualização, banco de dados, automação, IA e hospedagem moderna para entregar soluções rápidas e escaláveis."}</p>
+        </div>
+        <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar ferramentas por categoria">
+          {STACK_CATEGORIES.map((cat) => {
+            const active = cat === category;
+            return (
+              <button
+                key={cat}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setCategory(cat)}
+                className={`cursor-pointer rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-[#A3E635] bg-[#A3E635] font-semibold text-[#090C10]"
+                    : "border-white/10 bg-[#0B0F14]/75 text-[#94A3B8] hover:border-[#304054] hover:text-white"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </Reveal>
+      <div key={category} className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {visible.map((tool, idx) => (
+          <article
+            key={tool.name}
+            onMouseMove={handleSpotlightMove}
+            style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "backwards" }}
+            className="group/spot relative flex animate-in fade-in zoom-in-95 slide-in-from-bottom-2 flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F14]/75 p-6 backdrop-blur-md duration-500 transition-colors hover:-translate-y-1 hover:border-[#A3E635]/30"
+          >
+            <SpotlightOverlay />
+            <div className="relative z-10">
+              <span className="font-mono-data inline-block rounded border border-[#233322] bg-[#111B13] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[#A3E635]">
+                {tool.tag}
+              </span>
+              <h3 className="mt-4 text-lg font-semibold text-[#F0F4F8]">{tool.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">{tool.desc}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+
 const FAQ_ITEMS = [
   {
     q: "Preciso pagar licenças caras do Power BI para toda a minha equipe?",
@@ -1848,6 +1919,13 @@ return (<>
 </div>
 </section>
 <SectionDivider delay={3.7} />
+
+<section id="stack" className="py-20 md:py-24">
+<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+<StackTools />
+</div>
+</section>
+<SectionDivider delay={0.6} />
 
 <section id="sobre" className="bg-[#0B0F14]/45 py-20 md:py-24">
 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
